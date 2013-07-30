@@ -1,4 +1,4 @@
-kraken-web
+ketos-web
 ==========
 
-Web Service for Kraken Mobile Apps.
+Web Service for Ketos Mobile Apps.
