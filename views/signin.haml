@@ -13,8 +13,13 @@
       Remember me
     %button{:class=>"btn btn-large btn-primary btn-block", :type=>"submit"}
       Sign in
+  %a{:href=>"/register"}
+    Sign up for a new account
 
-%div{:class=>"register-footer"}
-  Find me on <a href="http://github.com/terryg/ketos-web">github</a>.
+
+  %div{:id=>"footer"}
+    %div{:class=>"container"}
+      %p{:class=>"text-muted credit"}
+        Find me on <a href="http://github.com/terryg/ketos-web">github</a>.
 
 = File.read(File.join('views', 'google_analytics.html'))
