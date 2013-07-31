@@ -1,4 +1,4 @@
 ketos-web
 ==========
 
-Web Service for Ketos Mobile Apps.
+A Web Interface for the Ketos Web Service.
