@@ -1,0 +1,25 @@
+%div
+  %img{:src => "ketos-small.png"}
+%div
+  %h1
+    %a{:href=>"/"}
+      Ketos - streaming your feeds
+
+%div
+  %img{:src => "ketos.png"}
+
+- if @current_user
+  %div
+    Logged in
+
+- else
+  %div
+
+
+%div
+  &nbsp;
+
+%div
+  Find me on <a href="http://github.com/terryg/ketos-web">github</a>.
+
+= File.read(File.join('views', 'google_analytics.html'))

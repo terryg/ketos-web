@@ -1,0 +1,13 @@
+%div{:id=>"wrap"}
+  %div{:id=>"container"}
+    %div{:class=>"page-header"}
+      %h1
+        %img{:src=>"ketos-small.png"}
+        Ketos App
+
+  %div{:id=>"footer"}
+    %div{:class=>"container"}
+      %p{:class=>"text-muted credit"}
+        Find me on <a href="http://github.com/terryg/ketos-web">github</a>.
+
+= File.read(File.join('views', 'google_analytics.html'))
