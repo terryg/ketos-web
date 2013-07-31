@@ -1,21 +1,21 @@
-%div{:id=>"container"}
+%div{:id=>"wrap"}
+  %div{:id=>"container"}
   
-  %h1{:class=>"register-heading"}
-    %img{:src=>"ketos-small.png"}
-    Ketos App
-  %form{:class=>"form-register",:method=>"POST",:action=>"/signin"}
-    %h2{:class=>"form-register-heading"}
-      All your social networks belong to us.
-    %input{:name=>"email",:type=>"text", :class=>"form-control", :placeholder=>"Email address"}
-    %input{:name=>"password",:type=>"password", :class=>"form-control", :placeholder=>"Password"}
-    %label{:class=>"checkbox"}
-      %input{:type=>"checkbox",:value=>"remember-me"}
-      Remember me
-    %button{:class=>"btn btn-large btn-primary btn-block", :type=>"submit"}
-      Sign in
-  %a{:href=>"/register"}
-    Sign up for a new account
-
+    %h1{:class=>"register-heading"}
+      %img{:src=>"ketos-small.png"}
+      Ketos App
+    %form{:class=>"form-register",:method=>"POST",:action=>"/signin"}
+      %h2{:class=>"form-register-heading"}
+        All your social networks belong to us.
+      %input{:name=>"email",:type=>"text", :class=>"form-control", :placeholder=>"Email address"}
+      %input{:name=>"password",:type=>"password", :class=>"form-control", :placeholder=>"Password"}
+      %label{:class=>"checkbox"}
+        %input{:type=>"checkbox",:value=>"remember-me"}
+        Remember me
+      %button{:class=>"btn btn-large btn-primary btn-block", :type=>"submit"}
+        Log in
+    %a{:href=>"/register"}
+      Sign up for a new account
 
   %div{:id=>"footer"}
     %div{:class=>"container"}
