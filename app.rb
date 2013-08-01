@@ -33,7 +33,7 @@ class App < Sinatra::Base
       return
     end
 
-    response = RestClient.post('http://localhost:5001/register',
+    response = RestClient.post('http://ketos.herokuapp.com/register',
                                {
                                  :email => params[:email],
                                  :password => params[:password]
@@ -58,7 +58,7 @@ class App < Sinatra::Base
       return
     end
 
-    response = RestClient.post('http://localhost:5001/signin',
+    response = RestClient.post('http://ketos.herokuapp.com/signin',
                                {
                                  :email => params[:email],
                                  :password => params[:password]
