@@ -80,6 +80,7 @@ class App < Sinatra::Base
     redirect '/'
   end
 
+  # FAIL
   get '/auth/failure' do
     redirect '/'
   end
