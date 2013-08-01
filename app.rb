@@ -3,13 +3,19 @@ require 'oauth'
 require 'haml'
 require 'omniauth'
 require 'omniauth-twitter'
+require 'omniauth-tumblr'
 require 'rest-client'
 require 'json'
 
 class App < Sinatra::Base
   enable :sessions
 
-  get "/" do
+  use OmniAuth::Builder do
+    provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
+    provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
+  end
+
+  get '/' do
     if session[:auth_token].nil?
       haml :register
     else
@@ -17,17 +23,17 @@ class App < Sinatra::Base
     end
   end
 
-  get "/register" do
+  get '/register' do
     haml :register
   end
 
-  post "/register" do
+  post '/register' do
     if params[:email].nil? or params[:password].nil?
       haml :register
       return
     end
 
-    response = RestClient.post('http://localhost:5000/register',
+    response = RestClient.post('http://localhost:5001/register',
                                {
                                  :email => params[:email],
                                  :password => params[:password]
@@ -36,23 +42,23 @@ class App < Sinatra::Base
     when 200
       json = JSON.parse(response.body)
       session[:auth_token] = json['token']
-      redirect "/"
+      redirect '/'
     else
       haml :register
     end
   end
 
-  get "/signin" do
-    haml :signin
+  get '/login' do
+    haml :login
   end
 
-  post "/signin" do
+  post '/login' do
     if params[:email].nil? or params[:password].nil?
-      haml :signin
+      haml :login
       return
     end
 
-    response = RestClient.post('http://localhost:5000/signin',
+    response = RestClient.post('http://localhost:5001/signin',
                                {
                                  :email => params[:email],
                                  :password => params[:password]
@@ -61,10 +67,21 @@ class App < Sinatra::Base
     when 200
       json = JSON.parse(response.body)
       session[:auth_token] = json['token']
-      redirect "/"
+      redirect '/'
     else
-      haml :signin
+      haml :login
     end
+  end
+
+  get '/auth/:provider/callback' do
+    auth_hash = request.env['omniauth.auth']
+    session[:access_token] = auth_hash[:credentials][:token]
+    session[:access_token_secret] = auth_hash[:credentials][:secret]
+    redirect '/'
+  end
+
+  get '/auth/failure' do
+    redirect '/'
   end
 
 end

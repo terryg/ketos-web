@@ -14,6 +14,8 @@ GEM
     omniauth-oauth (1.0.1)
       oauth
       omniauth (~> 1.0)
+    omniauth-tumblr (1.1)
+      omniauth-oauth (~> 1.0)
     omniauth-twitter (1.0.0)
       multi_json (~> 1.3)
       omniauth-oauth (~> 1.0)
@@ -36,6 +38,7 @@ DEPENDENCIES
   json
   oauth
   omniauth
+  omniauth-tumblr
   omniauth-twitter
   rest-client
   sinatra

@@ -4,7 +4,7 @@
     %h1{:class=>"register-heading"}
       %img{:src=>"ketos-small.png"}
       Ketos App
-    %form{:class=>"form-register",:method=>"POST",:action=>"/signin"}
+    %form{:class=>"form-register",:method=>"POST",:action=>"/login"}
       %h2{:class=>"form-register-heading"}
         All your social networks belong to us.
       %input{:name=>"email",:type=>"text", :class=>"form-control", :placeholder=>"Email address"}
@@ -14,12 +14,15 @@
         Remember me
       %button{:class=>"btn btn-large btn-primary btn-block", :type=>"submit"}
         Log in
-    %a{:href=>"/register"}
-      Sign up for a new account
+      %a{:href=>"/register"}
+        Sign up for a new account
 
   %div{:id=>"footer"}
     %div{:class=>"container"}
       %p{:class=>"text-muted credit"}
         Find me on <a href="http://github.com/terryg/ketos-web">github</a>.
+        %br
+        %a{:href=>"https://docs.google.com/presentation/d/1DEcF9lbn2sSmDwXPBjLvoHf8CRtxcTbgFMfiQk2yvFA/pub?start=false&loop=false&delayms=3000"}
+          A final project for BU MET CS755
 
 = File.read(File.join('views', 'google_analytics.html'))
