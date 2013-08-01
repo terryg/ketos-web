@@ -1,21 +1,23 @@
 %div{:id=>"wrap"}
   %div{:id=>"container"}
     %div{:class=>"page-header"}
-      %h1
+      %h1{:class=>"home-heading"}
         %img{:src=>"ketos-small.png"}
         Ketos App
 
-      = session[:auth_token] 
-      %br
-      %a{:href=>"/auth/twitter"}
-        Add Twitter
-
-  %div{:id=>"footer"}
-    %div{:class=>"container"}
-      %p{:class=>"text-muted credit"}
-        Find me on <a href="http://github.com/terryg/ketos-web">github</a>.
+      %div{:class=>"home-dashboard"}
         %br
-        %a{:href=>"https://docs.google.com/presentation/d/1DEcF9lbn2sSmDwXPBjLvoHf8CRtxcTbgFMfiQk2yvFA/pub?start=false&loop=false&delayms=3000"}
-          A final project for BU MET CS755.
+        = session[:auth_token] 
+        %br
 
-= File.read(File.join('views', 'google_analytics.html'))
+        - if session['twitter']
+          = session['twitter'][:token] 
+          %br
+
+          = session['twitter'][:token_secret] 
+          %br
+        - else
+          %a{:href=>"/auth/twitter"}
+            Add Twitter
+
+  = haml :footer
