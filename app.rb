@@ -75,8 +75,10 @@ class App < Sinatra::Base
 
   get '/auth/:provider/callback' do
     auth_hash = request.env['omniauth.auth']
-    session[:access_token] = auth_hash[:credentials][:token]
-    session[:access_token_secret] = auth_hash[:credentials][:secret]
+    provider = params[:provider]
+    session[provider] = {}
+    session[provider][:token] = auth_hash[:credentials][:token]
+    session[provider][:token_secret] = auth_hash[:credentials][:secret]
     redirect '/'
   end
 
