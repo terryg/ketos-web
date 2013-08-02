@@ -6,6 +6,7 @@ require 'omniauth-twitter'
 require 'omniauth-tumblr'
 require 'rest-client'
 require 'json'
+require 'twitter'
 
 class App < Sinatra::Base
   enable :sessions
@@ -19,6 +20,22 @@ class App < Sinatra::Base
     if session[:auth_token].nil?
       haml :register
     else
+
+      if session['twitter']
+        puts "**** session [#{session}]"
+        puts "**** session['twitter'] [#{session['twitter']}]"
+        puts "**** session[:twitter] [#{session[:twitter]}]"
+
+        Twitter.configure do |config|
+          config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
+          config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
+          config.oauth_token = session['twitter'][:token]
+          config.oauth_token_secret = session['twitter'][:token_secret]
+        end
+
+        @tweets = Twitter.home_timeline
+      end
+
       haml :home
     end
   end

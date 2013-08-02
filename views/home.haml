@@ -4,20 +4,19 @@
       %h1{:class=>"home-heading"}
         %img{:src=>"ketos-small.png"}
         Ketos App
-
       %div{:class=>"home-dashboard"}
         %br
+        AUTH -
         = session[:auth_token] 
         %br
 
         - if session['twitter']
-          = session['twitter'][:token] 
-          %br
-
-          = session['twitter'][:token_secret] 
-          %br
+          %div{:class=>"home-twitter"}
+            YOU ARE LOGGED!
+            - @tweets.each do |t|
+              %div{:class=>"home-tweet"}
+                = t
         - else
           %a{:href=>"/auth/twitter"}
             Add Twitter
-
   = haml :footer
