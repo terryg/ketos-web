@@ -83,7 +83,7 @@ class App < Sinatra::Base
   end
 
   post '/login' do
-    session[:auth_token] = nil
+    session.clear
 
     if params[:email].nil? or params[:password].nil?
       haml :login
@@ -97,12 +97,29 @@ class App < Sinatra::Base
                                })
     case response.code
     when 200
+      puts "****  response from signin #{response.body}"
       json = JSON.parse(response.body)
       session[:auth_token] = json['token']
+      
+      json['providers'].each do |p|
+        j = JSON.parse(p)
+
+        puts "***** here is #{j['provider']}"
+
+        session[j['provider']] = {}
+        session[j['provider']][:token] = j['access_token']
+        session[j['provider']][:token_secret] = j['access_token_secret']
+      end
+      
       redirect '/'
     else
       haml :login
     end
+  end
+
+  get '/logout' do
+    session.clear
+    redirect '/'
   end
 
   get '/auth/:provider/callback' do
