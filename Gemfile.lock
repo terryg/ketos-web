@@ -6,16 +6,30 @@ GEM
     haml (4.0.3)
       tilt
     hashie (2.0.5)
+    httpauth (0.2.0)
     json (1.8.0)
+    jwt (0.1.8)
+      multi_json (>= 1.5)
     mime-types (1.23)
     multi_json (1.7.7)
     multipart-post (1.2.0)
     oauth (0.4.7)
+    oauth2 (0.8.1)
+      faraday (~> 0.8)
+      httpauth (~> 0.1)
+      jwt (~> 0.1.4)
+      multi_json (~> 1.0)
+      rack (~> 1.2)
     omniauth (1.1.4)
       hashie (>= 1.2, < 3)
       rack
+    omniauth-facebook (1.4.1)
+      omniauth-oauth2 (~> 1.1.0)
     omniauth-oauth (1.0.1)
       oauth
+      omniauth (~> 1.0)
+    omniauth-oauth2 (1.1.1)
+      oauth2 (~> 0.8.0)
       omniauth (~> 1.0)
     omniauth-tumblr (1.1)
       omniauth-oauth (~> 1.0)
@@ -46,6 +60,7 @@ DEPENDENCIES
   json
   oauth
   omniauth
+  omniauth-facebook
   omniauth-tumblr
   omniauth-twitter
   rest-client

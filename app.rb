@@ -4,6 +4,7 @@ require 'haml'
 require 'omniauth'
 require 'omniauth-twitter'
 require 'omniauth-tumblr'
+require 'omniauth-facebook'
 require 'rest-client'
 require 'json'
 require 'twitter'
@@ -12,6 +13,7 @@ class App < Sinatra::Base
   enable :sessions
 
   use OmniAuth::Builder do
+    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET']
     provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
   end
@@ -20,6 +22,8 @@ class App < Sinatra::Base
     if session[:auth_token].nil?
       haml :register
     else
+
+      @tweets = {}
 
       if session['twitter']
         puts "**** session [#{session}]"
@@ -34,6 +38,15 @@ class App < Sinatra::Base
         end
 
         @tweets = Twitter.home_timeline
+
+        @tweets.each do |t|
+          response = RestClient.post("#{ENV['KETOS_URL']}/item",
+                                     {
+                                       :token => session[:auth_token],
+                                       :text => t.full_text
+                                     })
+        end
+
       end
 
       haml :home
@@ -50,7 +63,7 @@ class App < Sinatra::Base
       return
     end
 
-    response = RestClient.post('http://ketos.herokuapp.com/register',
+    response = RestClient.post("#{ENV['KETOS_URL']}/register",
                                {
                                  :email => params[:email],
                                  :password => params[:password]
@@ -70,12 +83,14 @@ class App < Sinatra::Base
   end
 
   post '/login' do
+    session[:auth_token] = nil
+
     if params[:email].nil? or params[:password].nil?
       haml :login
       return
     end
 
-    response = RestClient.post('http://ketos.herokuapp.com/signin',
+    response = RestClient.post("#{ENV['KETOS_URL']}/signin",
                                {
                                  :email => params[:email],
                                  :password => params[:password]
@@ -96,6 +111,16 @@ class App < Sinatra::Base
     session[provider] = {}
     session[provider][:token] = auth_hash[:credentials][:token]
     session[provider][:token_secret] = auth_hash[:credentials][:secret]
+
+    response = RestClient.post("#{ENV['KETOS_URL']}/provider",
+                               {
+                                 :token => session[:auth_token],
+                                 :uid => auth_hash[:uid],
+                                 :provider => provider,
+                                 :access_token => auth_hash[:credentials][:token],
+                                 :access_token_secret => auth_hash[:credentials][:secret]
+                               })
+    puts "**** provider #{response.body}"
     redirect '/'
   end
 
