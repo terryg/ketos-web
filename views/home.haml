@@ -4,19 +4,25 @@
       %h1{:class=>"home-heading"}
         %img{:src=>"ketos-small.png"}
         Ketos App
-      %div{:class=>"home-dashboard"}
-        %br
+      %div{:class=>"row"}
         AUTH -
         = session[:auth_token] 
-        %br
 
-        - if session['twitter']
-          %div{:class=>"home-twitter"}
-            YOU ARE LOGGED!
-            - @tweets.each do |t|
-              %div{:class=>"home-tweet"}
-                = t
-        - else
-          %a{:href=>"/auth/twitter"}
-            Add Twitter
+
+    %div{:class=>"row"}
+      %div{:class=>"col-lg-4"}
+      - if !session['twitter']
+        %a{:href=>"/auth/twitter"}
+          Add Twitter
+       
+      - if !session['facebook']
+        %br
+        %a{:href=>"/auth/facebook"}
+          Add Facebook
+
+      %div{:class=>"col-lg-8"}
+        - @tweets.each do |t|
+          %div{:class=>"home-tweet"}
+            = t.full_text
+
   = haml :footer
