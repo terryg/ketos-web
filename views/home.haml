@@ -10,21 +10,20 @@
           AUTH -
           = session[:auth_token] 
 
-
-    %div{:class=>"row"}
-      %div{:class=>"col-lg-4"}
-      - if !session['twitter']
-        %a{:href=>"/auth/twitter"}
-          Add Twitter
+        %div{:class=>"row"}
+          %div{:class=>"col-lg-2"}
+          - if !session['twitter']
+            %a{:href=>"/auth/twitter"}
+              Add Twitter
        
-      - if !session['facebook']
-        %br
-        %a{:href=>"/auth/facebook"}
-          Add Facebook
+          - if !session['facebook']
+            %br
+            %a{:href=>"/auth/facebook"}
+              Add Facebook
 
-      %div{:class=>"col-lg-8"}
-        - @tweets.each do |t|
-          %div{:class=>"home-tweet"}
-            = t.full_text
+          %div{:class=>"col-lg-10"}
+          - @tweets.each do |t|
+            %div{:class=>"home-tweet"}
+              = t.full_text
 
   = haml :footer
