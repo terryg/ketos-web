@@ -7,6 +7,7 @@ require 'omniauth-tumblr'
 require 'omniauth-facebook'
 require 'rest-client'
 require 'json'
+require 'twitter'
 
 class App < Sinatra::Base
   enable :sessions
