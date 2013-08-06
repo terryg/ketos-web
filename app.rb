@@ -8,6 +8,7 @@ require 'omniauth-facebook'
 require 'rest-client'
 require 'json'
 require 'twitter'
+require 'koala'
 
 class App < Sinatra::Base
   enable :sessions
@@ -39,24 +40,20 @@ class App < Sinatra::Base
 
       @tweets = {}
 
-      if session['twitter']
-        puts "**** session [#{session}]"
-        puts "**** session['twitter'] [#{session['twitter']}]"
-        puts "**** session[:twitter] [#{session[:twitter]}]"
-
+      if session[:twitter]
         Twitter.configure do |config|
           config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
           config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
-          config.oauth_token = session['twitter'][:token]
-          config.oauth_token_secret = session['twitter'][:token_secret]
+          config.oauth_token = session[:twitter][:token]
+          config.oauth_token_secret = session[:twitter][:token_secret]
         end
 
         @tweets = Twitter.home_timeline
-        session['twitter']['last_id'] ||= 0
+        session[:twitter][:last_id] ||= 0
         ids_to_save = []
         @tweets.each do |t|
-          puts "**** #{session['twitter']['last_id']} < #{t.id} = #{session['twitter']['last_id'] < t.id}"
-          if session['twitter']['last_id'] < t.id
+          puts "**** #{session[:twitter][:last_id]} < #{t.id} = #{session[:twitter][:last_id] < t.id}"
+          if session[:twitter][:last_id] < t.id
             ids_to_save << t.id
           end
         end
@@ -70,14 +67,35 @@ class App < Sinatra::Base
                                          :text => t.full_text
                                        })
 
-            if session['twitter']['last_id'] < t.id
-              session['twitter']['last_id'] = t.id
+            if session[:twitter][:last_id] < t.id
+              session[:twitter][:last_id] = t.id
             end
           end
+        end 
+      end # if session[:twitter]
+
+      if session[:facebook]
+        graph = Koala::Facebook::API.new(session[:facebook][:token])
+        puts "**** Accessing FB feed..."
+        begin
+          @feed = graph.get_connections("me", "home")
+        rescue Koala::Facebook::APIError => e
+          puts "**** there was a problem"
+          puts "**** #{e.response_body}"
+          puts "**** #{e.message}"
+          @feed = []
         end
+        puts "**** Done."
+        puts "**** #{@feed}"
+        session[:facebook][:last_created_time] ||= 0
+        ids_to_save = []
+        @feed.each do |f|
+          puts "**** #{f}"
+        end
+        
+      end # if session['facebook']
 
-      end
-
+      @refresh = "on"
       haml :home
     end
   end
@@ -157,6 +175,9 @@ class App < Sinatra::Base
 
   get '/auth/:provider/callback' do
     auth_hash = request.env['omniauth.auth']
+
+    puts "**** /auth/#{params[:provider]}/callback"
+    puts "**** #{auth_hash}"
 
     provider = params[:provider]
     session[provider] = {}
