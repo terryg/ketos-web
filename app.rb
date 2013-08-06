@@ -52,13 +52,28 @@ class App < Sinatra::Base
         end
 
         @tweets = Twitter.home_timeline
+        session['twitter']['last_id'] ||= 0
+        ids_to_save = []
+        @tweets.each do |t|
+          puts "**** #{session['twitter']['last_id']} < #{t.id} = #{session['twitter']['last_id'] < t.id}"
+          if session['twitter']['last_id'] < t.id
+            ids_to_save << t.id
+          end
+        end
 
         @tweets.each do |t|
-          response = RestClient.post("#{ENV['KETOS_URL']}/item",
-                                     {
-                                       :token => session[:auth_token],
-                                       :text => t.full_text
-                                     })
+          if ids_to_save.include?(t.id)
+            response = RestClient.post("#{ENV['KETOS_URL']}/item",
+                                       {
+                                         :token => session[:auth_token],
+                                         :created_at => t.created_at,
+                                         :text => t.full_text
+                                       })
+
+            if session['twitter']['last_id'] < t.id
+              session['twitter']['last_id'] = t.id
+            end
+          end
         end
 
       end
