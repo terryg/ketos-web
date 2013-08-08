@@ -96,13 +96,17 @@ class App < Sinatra::Base
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
         feed.each do |f|
-          @items << Item.new(f)
+          puts "**** f'[id'] #{f['id']}"
+          @items << Item.new(f, true)
         end
         
       end # if session['facebook']
 
       @items.sort_by!{ |i| i.created_at }
       @items.reverse!
+      @items.each do |i|
+        i.store(session[:auth_token])
+      end
 
       @refresh = "on"
       haml :home
