@@ -10,6 +10,8 @@ require 'json'
 require 'twitter'
 require 'koala'
 
+require './item'
+
 class App < Sinatra::Base
   enable :sessions
 
@@ -37,8 +39,8 @@ class App < Sinatra::Base
     if session[:auth_token].nil?
       haml :register
     else
-
-      @tweets = {}
+      
+      @items = []
 
       if session[:twitter]
         Twitter.configure do |config|
@@ -48,17 +50,22 @@ class App < Sinatra::Base
           config.oauth_token_secret = session[:twitter][:token_secret]
         end
 
-        @tweets = Twitter.home_timeline
+        puts "**** Accessing Twitter feed..."
+        tweets = Twitter.home_timeline
+        puts "**** Done."
+
         session[:twitter][:last_id] ||= 0
         ids_to_save = []
-        @tweets.each do |t|
-          puts "**** #{session[:twitter][:last_id]} < #{t.id} = #{session[:twitter][:last_id] < t.id}"
+        tweets.each do |t|
           if session[:twitter][:last_id] < t.id
             ids_to_save << t.id
+            need_save = true
           end
+
+          @items << Item.new(t, need_save)
         end
 
-        @tweets.each do |t|
+        tweets.each do |t|
           if ids_to_save.include?(t.id)
             response = RestClient.post("#{ENV['KETOS_URL']}/item",
                                        {
@@ -78,24 +85,24 @@ class App < Sinatra::Base
         graph = Koala::Facebook::API.new(session[:facebook][:token])
         puts "**** Accessing FB feed..."
         begin
-          @feed = graph.get_connections("me", "home")
+          feed = graph.get_connections("me", "home")
         rescue Koala::Facebook::APIError => e
           puts "**** there was a problem"
           puts "**** #{e.response_body}"
           puts "**** #{e.message}"
-          @feed = []
+          feed = []
         end
         puts "**** Done."
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
-        @feed.each do |f|
-          puts "**** #{f}"
-          puts "**** #{f['id']}"
-          puts "**** #{f['from']['name']}"
-          puts "**** #{f['description']}"
+        feed.each do |f|
+          @items << Item.new(f)
         end
         
       end # if session['facebook']
+
+      @items.sort_by!{ |i| i.created_at }
+      @items.reverse!
 
       @refresh = "on"
       haml :home

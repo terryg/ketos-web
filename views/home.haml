@@ -18,8 +18,17 @@
               Add Facebook
 
           %div{:class=>"col-lg-10"}
-          - @tweets.each do |t|
-            %div{:class=>"home-tweet"}
-              = t.full_text
+            %table{:class=>"home-items"}
+              %tr
+                %th
+                  From
+                %th
+                  Msg
+              - @items.each do |i|
+                %tr
+                  %td
+                    = i.name
+                  %td
+                    = i.text
 
   = haml :footer
