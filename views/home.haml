@@ -21,11 +21,14 @@
             %table{:class=>"home-items"}
               %tr
                 %th
+                %th
                   From
                 %th
                   Msg
               - @items.each do |i|
                 %tr
+                  %td
+                    = i.permalink
                   %td
                     = i.name
                   %td

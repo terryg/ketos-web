@@ -27,6 +27,12 @@ class Item
     end
   end
 
+  def permalink
+    if source == "twitter"
+      "<a href=\"http://twitter.com/#{self.name}/status/#{self.id}\"><img src=\"offsite.png\"/></a>"
+    end
+  end
+
   def store(auth_token)
     if need_save == true
       # :NOTE: 20130807 tgl: There's enough of these that we shouldn't
