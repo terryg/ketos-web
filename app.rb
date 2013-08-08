@@ -28,7 +28,7 @@ class App < Sinatra::Base
   end
 
   use OmniAuth::Builder do
-    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET']
+    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'read_stream', :display => 'popup'
     provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
   end
@@ -86,11 +86,13 @@ class App < Sinatra::Base
           @feed = []
         end
         puts "**** Done."
-        puts "**** #{@feed}"
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
         @feed.each do |f|
           puts "**** #{f}"
+          puts "**** #{f['id']}"
+          puts "**** #{f['from']['name']}"
+          puts "**** #{f['description']}"
         end
         
       end # if session['facebook']
