@@ -27,9 +27,44 @@ class Item
     end
   end
 
+  def source_img
+    if source == "twitter"
+      
+    end
+  end
+
+  def name_html
+    if source == "twitter"
+      "<a href=\"http://twitter/@#{name}\">#{name}</a>"
+    else
+      "#{name}"
+    end
+  end
+
+  def text_html
+    s = text
+
+    #regexps
+    url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
+    user = /@(\w+)/
+
+    #replace @usernames with links to that user
+    while s =~ user
+        s.sub! "@#{$1}", "<a href='http://twitter.com/#{$1}' >#{$1}</a>"
+    end
+
+    #replace urls with links
+    while s =~ url
+        name = $2
+        s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{name}' >#{name}</a> "
+    end
+
+    s    
+  end
+
   def permalink
     if source == "twitter"
-      "<a href=\"http://twitter.com/#{self.name}/status/#{self.id}\"><img src=\"offsite.png\"/></a>"
+      "<a href=\"http://twitter.com/#{self.name}/status/#{self.id}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
     end
   end
 

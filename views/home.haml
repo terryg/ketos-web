@@ -21,17 +21,17 @@
             %table{:class=>"home-items"}
               %tr
                 %th
-                %th
                   From
                 %th
                   Msg
+                %th
               - @items.each do |i|
                 %tr
                   %td
+                    = i.name_html
+                  %td
+                    = i.text_html
+                  %td
                     = i.permalink
                   %td
-                    = i.name
-                  %td
-                    = i.text
-
   = haml :footer

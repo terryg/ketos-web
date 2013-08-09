@@ -99,3 +99,8 @@ body {
   max-width: 700px;
   margin: 0 auto;
 }
+
+.home-items th
+{
+  vertical-align:top;
+}
