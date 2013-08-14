@@ -41,7 +41,7 @@ class Item
 
   def name_html
     if source == "twitter"
-      "<a href=\"https://twitter.com/@#{name}\">#{name}</a>"
+      "<a href=\"https://twitter.com/#{name}\">@#{name}</a>"
     elsif source == "facebook"
       ids = self.id.split("_")
       "<a href=\"https://www.facebook.com/#{ids[0]}\">#{name}</a>"
@@ -52,26 +52,24 @@ class Item
 
   def text_html
     s = text
+  end
 
+  def ugh
     #regexps
     url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
     user = /@(\w+)/
 
     #replace @usernames with links to that user
     while s =~ user
-        s.sub! "@#{$1}", "<a href='https://www.twitter.com/#{$1}' >@#{$1}</a>"
+        s.sub! "@#{$1}", "<a href='https://www.twitter.com/#{$1}' >#{$1}</a>"
     end
 
     #replace urls with links
     while s =~ url
-        name = $2
-        s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{name}' >#{name}</a> "
+        n = $2
+        s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{n}' >#{n}</a> "
     end
-
-    if self.img_url
-      s << "<br/><img src=\"#{self.img_url}\"/>"
-    end
-
+    
     s    
   end
 
