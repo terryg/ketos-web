@@ -52,9 +52,7 @@ class Item
 
   def text_html
     s = text
-  end
 
-  def ugh
     #regexps
     url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
     user = /@(\w+)/
@@ -67,7 +65,7 @@ class Item
     #replace urls with links
     while s =~ url
         n = $2
-        s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{n}' >#{n}</a> "
+        s.sub! /( |^)http:\/\/#{n}( |$)/, " <a href='http://#{n}' >#{n}</a> "
     end
     
     s    
