@@ -8,6 +8,7 @@ class Item
   attr_accessor :text
   attr_accessor :need_save
   attr_accessor :source
+  attr_accessor :img_url
 
   def initialize(a, need_save)
     self.need_save = need_save
@@ -23,7 +24,12 @@ class Item
       self.id = a['id']
       self.created_at = Time.parse(a['created_time'])
       self.name = a['from']['name']
-      self.text = a['message']
+      if a['message']
+        self.text = a['message']
+      elsif a['story']
+        self.text = a['story']
+      end
+      self.img_url = a['picture']
     end
   end
 
@@ -35,7 +41,10 @@ class Item
 
   def name_html
     if source == "twitter"
-      "<a href=\"http://twitter/@#{name}\">#{name}</a>"
+      "<a href=\"https://twitter.com/@#{name}\">#{name}</a>"
+    elsif source == "facebook"
+      ids = self.id.split("_")
+      "<a href=\"https://www.facebook.com/#{ids[0]}\">#{name}</a>"
     else
       "#{name}"
     end
@@ -50,7 +59,7 @@ class Item
 
     #replace @usernames with links to that user
     while s =~ user
-        s.sub! "@#{$1}", "<a href='http://twitter.com/#{$1}' >#{$1}</a>"
+        s.sub! "@#{$1}", "<a href='https://www.twitter.com/#{$1}' >@#{$1}</a>"
     end
 
     #replace urls with links
@@ -59,13 +68,23 @@ class Item
         s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{name}' >#{name}</a> "
     end
 
+    if self.img_url
+      s << "<br/><img src=\"#{self.img_url}\"/>"
+    end
+
     s    
   end
 
   def permalink
     if source == "twitter"
       "<a href=\"http://twitter.com/#{self.name}/status/#{self.id}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
+    elsif source == "facebook"
+      ids = self.id.split("_")
+      "<a href=\"https://www.facebook.com/#{ids[0]}/posts/#{ids[1]}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
+    else
+      "#{name}"
     end
+
   end
 
   def store(auth_token)

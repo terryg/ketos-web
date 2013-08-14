@@ -19,19 +19,21 @@
 
           %div{:class=>"col-lg-10"}
             %table{:class=>"home-items"}
-              %tr
-                %th
-                  From
-                %th
-                  Msg
-                %th
-              - @items.each do |i|
+              %thead
                 %tr
-                  %td
-                    = i.name_html
-                  %td
-                    = i.text_html
-                  %td
-                    = i.permalink
-                  %td
+                  %th
+                    From
+                  %th
+                    Msg
+                  %th
+              %tbody
+                - @items.each do |i|
+                  %tr
+                    %td
+                      = i.name_html
+                    %td
+                      = i.text_html
+                    %td
+                      = i.permalink
+
   = haml :footer

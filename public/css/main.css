@@ -100,7 +100,23 @@ body {
   margin: 0 auto;
 }
 
-.home-items th
+.home-items table
+{
+  border-collapse:collapse;
+}
+
+.home-items tr
+{
+  border-bottom: 1px solid #000;
+}
+
+.home-items tr.last
+{
+  border-bottom: none;
+}
+
+.home-items th,
+.home-items td
 {
   vertical-align:top;
 }

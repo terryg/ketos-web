@@ -96,7 +96,7 @@ class App < Sinatra::Base
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
         feed.each do |f|
-          puts "**** f'[id'] #{f['id']}"
+          puts "**** f #{f}"
           @items << Item.new(f, true)
         end
         
