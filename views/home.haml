@@ -1,9 +1,15 @@
 %div{:id=>"wrap"}
   %div{:id=>"container"}
+    %div{:class=>"page-header-nav"}
+      <a href="/logout">lougout</a>
+
     %div{:class=>"page-header"}
       %h1{:class=>"home-heading"}
         %img{:src=>"ketos-small.png"}
-        Ketos App
+          %a{:href=>"/"}
+            Ketos App
+
+    %div{:class=>"page"}
       %div{:class=>"home-dashboard"}
 
         %div{:class=>"row"}
