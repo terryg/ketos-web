@@ -120,3 +120,8 @@ body {
 {
   vertical-align:top;
 }
+
+.error-message
+{
+  color:red;
+}
