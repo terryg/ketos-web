@@ -146,38 +146,39 @@ class App < Sinatra::Base
   post '/login' do
     session.clear
 
-    if params[:email].nil? or params[:password].nil?
-      haml :login
-      return
-    end
+    if !params[:email].empty? and !params[:password].empty?
+      puts "**** log in to [#{ENV['KETOS_URL']}/signin]"
 
-    puts "**** log in to [#{ENV['KETOS_URL']}/signin]"
-    response = RestClient.post("#{ENV['KETOS_URL']}/signin",
-                               {
-                                 :email => params[:email],
-                                 :password => params[:password]
-                               })
-    case response.code
-    when 200
-      puts "****  response from signin #{response.body}"
-      json = JSON.parse(response.body)
-      puts "**** auth. token [#{json['token']}]"
-      session[:auth_token] = json['token']
-
-      json['providers'].each do |p|
-        j = JSON.parse(p)
-
-        puts "***** here is #{j['provider']}"
-
-        session[j['provider']] = {}
-        session[j['provider']][:token] = j['access_token']
-        session[j['provider']][:token_secret] = j['access_token_secret']
-      end
+      resource = RestClient::Resource.new("#{ENV['KETOS_URL']}/signin",
+                                          :timeout => -1)
+      payload = {:email => params[:email],:password => params[:password]}.to_json
+      response = resource.post(payload)
       
-      redirect to("http://#{request.host}:#{request.port}"), 303
-    else
-      haml :login
+      puts "****  response code from signin #{response.code}"
+      puts "****  response from signin #{response.body}"
+      
+      case response.code
+      when 200
+        json = JSON.parse(response.body)
+        puts "**** auth. token [#{json['token']}]"
+        session[:auth_token] = json['token']
+        
+        json['providers'].each do |p|
+          j = JSON.parse(p)
+          
+          puts "***** here is #{j['provider']}"
+          
+          session[j['provider']] = {}
+          session[j['provider']][:token] = j['access_token']
+          session[j['provider']][:token_secret] = j['access_token_secret']
+          end
+        
+        redirect to("http://#{request.host}:#{request.port}"), 303
+      end
     end
+
+    @error_message = "E-mail or password is incorrect."
+    haml :login
   end
 
   get '/logout' do
@@ -196,6 +197,8 @@ class App < Sinatra::Base
     session[provider][:token] = auth_hash[:credentials][:token]
     session[provider][:token_secret] = auth_hash[:credentials][:secret]
 
+
+    
     response = RestClient.post("#{ENV['KETOS_URL']}/provider",
                                {
                                  :token => session[:auth_token],
