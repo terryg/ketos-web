@@ -94,6 +94,8 @@ body {
   margin: 0 auto;
 }
 
+.page-header-nav,
+.page-header,
 .home-dashboard,
 .home-heading {
   max-width: 700px;
