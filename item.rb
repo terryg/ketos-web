@@ -53,20 +53,20 @@ class Item
   def text_html
     s = text
 
-    #regexps
-    url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
-    user = /@(\w+)/
-
     #replace @usernames with links to that user
+    user = /@(\w+)/
     while s =~ user
         s.sub! "@#{$1}", "<a href='https://www.twitter.com/#{$1}' >#{$1}</a>"
     end
 
     #replace urls with links
-    while s =~ url
-        n = $2
-        s.sub! /( |^)http:\/\/#{n}( |$)/, " <a href='http://#{n}' >#{n}</a> "
-    end
+    url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
+
+    # :BUG: 20130904 tgl: This is a culprit too, can spin and spin.
+
+#    while s =~ url
+#        s.sub! /( |^)http:\/\/#{$2}( |$)/, " <a href='http://#{$2}' >#{$2}</a> "
+#    end
     
     s    
   end
