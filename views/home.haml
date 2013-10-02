@@ -21,6 +21,11 @@
             %a{:href=>"/auth/facebook"}
               Add Facebook
 
+          - if !session['tumblr']
+            %br
+            %a{:href=>"/auth/tumblr"}
+              Add Tumblr
+
           %div{:class=>"col-lg-10"}
             %table{:class=>"home-items"}
               %thead
