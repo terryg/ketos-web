@@ -61,12 +61,10 @@ class Item
 
     #replace urls with links
     url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
-
-    # :BUG: 20130904 tgl: This is a culprit too, can spin and spin.
-
-#    while s =~ url
-#        s.sub! /( |^)http:\/\/#{$2}( |$)/, " <a href='http://#{$2}' >#{$2}</a> "
-#    end
+    while s =~ url
+      name = $2
+      s.sub! /( |^)http:\/\/#{$name}( |$)/, " <a href='http://#{$name}' >#{$name}</a> "
+    end
     
     s    
   end
