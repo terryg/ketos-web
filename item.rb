@@ -60,11 +60,11 @@ class Item
     end
 
     #replace urls with links
-    url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
-    while s =~ url
-      name = $2
-      s.sub! /( |^)http:\/\/#{$name}( |$)/, " <a href='http://#{$name}' >#{$name}</a> "
-    end
+#    url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
+#    while s =~ url
+#      name = $2
+#      s.sub! /( |^)http:\/\/#{$name}( |$)/, " <a href='http://#{$name}' >#{$name}</a> "
+#    end
     
     s    
   end
