@@ -11,14 +11,15 @@ require 'twitter'
 require 'koala'
 
 require './item'
+require './twitter_bot'
 
 class App < Sinatra::Base
   enable :sessions
 
   configure :development, :test do
-    set :host, 'localhost:5000'
+    set :host, 'localhost:3000'
     set :force_ssl, false
-    OmniAuth.config.full_host = 'http://localhost:5000'
+    OmniAuth.config.full_host = 'http://localhost:3000'
   end
   configure :staging do
     set :host, 'ketos-web-staging.herokuapp.com'
@@ -43,42 +44,14 @@ class App < Sinatra::Base
       @items = []
 
       if session[:twitter]
-        Twitter.configure do |config|
-          config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
-          config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
-          config.oauth_token = session[:twitter][:token]
-          config.oauth_token_secret = session[:twitter][:token_secret]
-        end
+        twit_bot = TwitterBot.new(session[:twitter][:token],
+                                  session[:twitter][:token_secret])
 
-        puts "**** Accessing Twitter feed..."
-        tweets = Twitter.home_timeline
-        puts "**** Done."
+        last_id = session[:twitter][:last_id] || 0
+        session[:twitter][:last_id] = twit_bot.get_tweets(last_id,
+                                                          session[:auth_token])
 
-        session[:twitter][:last_id] ||= 0
-        ids_to_save = []
-        tweets.each do |t|
-          if session[:twitter][:last_id] < t.id
-            ids_to_save << t.id
-            need_save = true
-          end
-
-          @items << Item.new(t, need_save)
-        end
-
-        tweets.each do |t|
-          if ids_to_save.include?(t.id)
-            response = RestClient.post("#{ENV['KETOS_URL']}/item",
-                                       {
-                                         :token => session[:auth_token],
-                                         :created_at => t.created_at,
-                                         :text => t.full_text
-                                       })
-
-            if session[:twitter][:last_id] < t.id
-              session[:twitter][:last_id] = t.id
-            end
-          end
-        end 
+        @items.concat(twit_bot.items)
       end # if session[:twitter]
 
       if session[:facebook]
@@ -96,7 +69,8 @@ class App < Sinatra::Base
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
         feed.each do |f|
-          @items << Item.new(f, true)
+          # :BUG: 20130905 tgl: not ready for prime time
+          @items << Item.new(f, false)
         end
         
       end # if session['facebook']
@@ -108,6 +82,8 @@ class App < Sinatra::Base
       end
 
       @refresh = "on"
+      
+      puts "**** All done, start rendering #{@items.size} items."
       haml :home
     end
   end
@@ -152,32 +128,34 @@ class App < Sinatra::Base
       resource = RestClient::Resource.new("#{ENV['KETOS_URL']}/signin",
                                           :timeout => -1)
       payload = {:email => params[:email],:password => params[:password]}.to_json
-      response = resource.post(payload)
+      resource.post(payload) { |response, req, result, &block|
+        puts "****  response code from signin #{response.code}"
+        puts "****  response from signin #{response.body}"
       
-      puts "****  response code from signin #{response.code}"
-      puts "****  response from signin #{response.body}"
-      
-      case response.code
-      when 200
-        json = JSON.parse(response.body)
-        puts "**** auth. token [#{json['token']}]"
-        session[:auth_token] = json['token']
-        
-        json['providers'].each do |p|
-          j = JSON.parse(p)
+        case response.code
+        when 200
+          json = JSON.parse(response.body)
+          puts "**** auth. token [#{json['token']}]"
+          session[:auth_token] = json['token']
           
-          puts "***** here is #{j['provider']}"
-          
-          session[j['provider']] = {}
-          session[j['provider']][:token] = j['access_token']
-          session[j['provider']][:token_secret] = j['access_token_secret']
+          json['providers'].each do |p|
+            j = JSON.parse(p)
+            
+            puts "***** here is #{j['provider']}"
+            
+            session[j['provider']] = {}
+            session[j['provider']][:token] = j['access_token']
+            session[j['provider']][:token_secret] = j['access_token_secret']
           end
-        
-        redirect to("http://#{request.host}:#{request.port}"), 303
-      end
+          
+          redirect to("http://#{request.host}:#{request.port}"), 303
+        when 401
+          @error_message = "E-mail or password is incorrect."          
+        end
+      }
+
     end
 
-    @error_message = "E-mail or password is incorrect."
     haml :login
   end
 
