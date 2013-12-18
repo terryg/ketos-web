@@ -58,7 +58,15 @@ class App < Sinatra::Base
         graph = Koala::Facebook::API.new(session[:facebook][:token])
         puts "**** Accessing FB feed..."
         begin
-          feed = graph.get_connections("me", "home")
+          feed = graph.get_connections("me", "home") 
+        
+          session[:facebook][:last_created_time] ||= 0
+          ids_to_save = []
+          feed.each do |f|
+            # :BUG: 20130905 tgl: not ready for prime time
+            @items << Item.new(f, false)
+          end
+
         rescue Koala::Facebook::APIError => e
           puts "**** there was a problem"
           puts "**** #{e.response_body}"
@@ -67,12 +75,6 @@ class App < Sinatra::Base
           session[:facebook] = nil
         end
         puts "**** Done."
-        session[:facebook][:last_created_time] ||= 0
-        ids_to_save = []
-        feed.each do |f|
-          # :BUG: 20130905 tgl: not ready for prime time
-          @items << Item.new(f, false)
-        end
         
       end # if session['facebook']
 
