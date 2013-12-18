@@ -64,6 +64,7 @@ class App < Sinatra::Base
           puts "**** #{e.response_body}"
           puts "**** #{e.message}"
           feed = []
+          session[:facebook] = nil
         end
         puts "**** Done."
         session[:facebook][:last_created_time] ||= 0
