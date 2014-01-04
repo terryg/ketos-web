@@ -36,6 +36,12 @@ class App < Sinatra::Base
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
   end
 
+  before do
+    if request.env['HTTP_HOST'].match(/herokuapp\.com/)
+      redirect 'http://www.ketosapp.com', 301
+    end
+  end
+
   get '/' do
     if session[:auth_token].nil?
       haml :register
