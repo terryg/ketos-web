@@ -19,9 +19,14 @@ class TwitterBot
       config.oauth_token_secret = @secret
     end
   
-    puts "**** Accessing Twitter feed..."
-    tweets = Twitter.home_timeline
-    puts "**** Done."
+    begin
+      puts "**** Accessing Twitter feed..."
+      tweets = Twitter.home_timeline
+      puts "**** Done."
+    rescue => e
+      puts "**** There was an error with Twitter -> #{e} ****"
+      tweets = []
+    end
 
     @items = []
 
