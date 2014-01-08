@@ -9,6 +9,7 @@ class Item
   attr_accessor :need_save
   attr_accessor :source
   attr_accessor :img_url
+  attr_accessor :post_url
 
   def initialize(a, need_save)
     self.need_save = need_save
@@ -19,17 +20,32 @@ class Item
       self.name = a.from_user
       self.text = a.full_text
     elsif a.is_a?(Hash)
-      # :NOTE: 20130807 tgl: At this time, only Facebook uses a hash.
-      self.source = "facebook"
-      self.id = a['id']
-      self.created_at = Time.parse(a['created_time'])
-      self.name = a['from']['name']
-      if a['message']
-        self.text = a['message']
-      elsif a['story']
-        self.text = a['story']
+      if a['post_url'] =~ /tumblr\.com/
+        self.source = "tumblr"
+        self.id = a['id']
+        self.created_at = Time.at(a['timestamp'])
+        self.name = a['post_author']
+        if a['type'] == "text"
+          self.text = a['body']
+        elsif a['type'] == "photo"
+          self.text = a['caption']
+        elsif a['type'] == "quote"
+          self.text = a['text']
+        end
+        self.img_url = a['url']
+        self.post_url = a['post_url']
+      else
+        self.source = "facebook"
+        self.id = a['id']
+        self.created_at = Time.parse(a['created_time'])
+        self.name = a['from']['name']
+        if a['message']
+          self.text = a['message']
+        elsif a['story']
+          self.text = a['story']
+        end
+        self.img_url = a['picture']
       end
-      self.img_url = a['picture']
     end
   end
 
@@ -72,6 +88,8 @@ class Item
   def permalink
     if source == "twitter"
       "<a href=\"http://twitter.com/#{self.name}/status/#{self.id}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
+    elsif source == "tumblr"
+      "<a href=\"#{self.post_url}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
     elsif source == "facebook"
       ids = self.id.split("_")
       "<a href=\"https://www.facebook.com/#{ids[0]}/posts/#{ids[1]}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"

@@ -11,7 +11,7 @@
       %div{:class=>"home-dashboard"}
 
         %div{:class=>"row"}
-          %div{:class=>"col-lg-2"}
+          %div{:class=>"col-lg-12"}
           - if !session['twitter']
             %a{:href=>"/auth/twitter"}
               Add Twitter
@@ -26,7 +26,17 @@
             %a{:href=>"/auth/tumblr"}
               Add Tumblr
 
-          %div{:class=>"col-lg-10"}
+        %div{:class=>"row"}
+          %div{:class=>"col-lg-12"}
+            %form{:action => "", :method => "post"}
+              %fieldset
+                %label{:for => "body"} Update:
+                %textarea{:name => "body"}
+
+                %input{:type => "submit", :value => "Send", :class => "button"}
+
+        %div{:class=>"row"}
+          %div{:class=>"col-lg-12"}
             %table{:class=>"home-items"}
               %thead
                 %tr

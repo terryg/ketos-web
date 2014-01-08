@@ -8,10 +8,12 @@ require 'omniauth-facebook'
 require 'rest-client'
 require 'json'
 require 'twitter'
+require 'tumblr_client'
 require 'koala'
 
 require './item'
 require './twitter_bot'
+require './tumblr_bot'
 
 class App < Sinatra::Base
   enable :sessions
@@ -23,6 +25,10 @@ class App < Sinatra::Base
   end
   configure :staging do
     set :host, 'ketos-web-staging.herokuapp.com'
+    set :force_ssl, true
+  end
+  configure :qa do
+    set :host, 'ketos-web-qa.herokuapp.com'
     set :force_ssl, true
   end
   configure :production do
@@ -42,54 +48,26 @@ class App < Sinatra::Base
     end
   end
 
-  get '/' do
+  post '/' do
     if session[:auth_token].nil?
       haml :register
     else
-      
-      @items = []
+      body = params[:body]
 
       if session[:twitter]
         twit_bot = TwitterBot.new(session[:twitter][:token],
                                   session[:twitter][:token_secret])
-
-        last_id = session[:twitter][:last_id] || 0
-        session[:twitter][:last_id] = twit_bot.get_tweets(last_id,
-                                                          session[:auth_token])
-
-        @items.concat(twit_bot.items)
-      end # if session[:twitter]
-
-      if session[:facebook]
-        graph = Koala::Facebook::API.new(session[:facebook][:token])
-        puts "**** Accessing FB feed..."
-        begin
-          feed = graph.get_connections("me", "home") 
-        
-          session[:facebook][:last_created_time] ||= 0
-          ids_to_save = []
-          feed.each do |f|
-            # :BUG: 20130905 tgl: not ready for prime time
-            @items << Item.new(f, false)
-          end
-
-        rescue Koala::Facebook::APIError => e
-          puts "**** there was a problem"
-          puts "**** #{e.response_body}"
-          puts "**** #{e.message}"
-          feed = []
-          session[:facebook] = nil
-        end
-        puts "**** Done."
-        
-      end # if session['facebook']
-
-      @items.sort_by!{ |i| i.created_at }
-      @items.reverse!
-      @items.each do |i|
-        i.store(session[:auth_token])
+        twit_bot.post(body)
       end
 
+      if session[:tumblr]
+        tumblr_bot = TumblrBot.new(session[:tumblr][:token],
+                                 session[:tumblr][:token_secret])
+        tumblr_bot.post(body)
+      end
+
+      @items = make_items
+      
       @refresh = "on"
       
       puts "**** All done, start rendering #{@items.size} items."
@@ -97,6 +75,19 @@ class App < Sinatra::Base
     end
   end
 
+  get '/' do
+    if session[:auth_token].nil?
+      haml :register
+    else    
+      @items = make_items
+      
+      @refresh = "on"
+      
+      puts "**** All done, start rendering #{@items.size} items."
+      haml :home
+    end
+  end
+  
   get '/register' do
     haml :register
   end
@@ -146,6 +137,8 @@ class App < Sinatra::Base
           json = JSON.parse(response.body)
           puts "**** auth. token [#{json['token']}]"
           session[:auth_token] = json['token']
+
+          session.options[:expire_after] = 2592000 unless params[:remember].nil? # 30.days
           
           json['providers'].each do |p|
             j = JSON.parse(p)
@@ -203,4 +196,64 @@ class App < Sinatra::Base
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
+  protected
+  
+  def make_items
+    items = []
+    
+    if session[:twitter]
+      twit_bot = TwitterBot.new(session[:twitter][:token],
+                                session[:twitter][:token_secret])
+      
+      last_id = session[:twitter][:last_id] || 0
+      session[:twitter][:last_id] = twit_bot.get_tweets(last_id,
+                                                        session[:auth_token])
+      
+      items.concat(twit_bot.items)
+    end # if session[:twitter]
+
+    if session[:tumblr]
+      tumblr_bot = TumblrBot.new(session[:tumblr][:token],
+                                 session[:tumblr][:token_secret])
+      
+      last_id = session[:tumblr][:last_id] || 0
+      session[:tumblr][:last_id] = tumblr_bot.get_posts(last_id,
+                                                        session[:auth_token])
+      
+      items.concat(tumblr_bot.items)    
+    end # if session[:tumblr]
+
+    if session[:facebook]
+      graph = Koala::Facebook::API.new(session[:facebook][:token])
+      puts "**** Accessing FB feed..."
+      begin
+        feed = graph.get_connections("me", "home") 
+        
+        session[:facebook][:last_created_time] ||= 0
+        ids_to_save = []
+        feed.each do |f|
+          # :BUG: 20130905 tgl: not ready for prime time
+          items << Item.new(f, false)
+        end
+        
+      rescue Koala::Facebook::APIError => e
+        puts "**** there was a problem"
+        puts "**** #{e.response_body}"
+        puts "**** #{e.message}"
+        feed = []
+        session[:facebook] = nil
+      end
+      puts "**** Done."
+      
+    end # if session['facebook']
+    
+    items.sort_by!{ |i| i.created_at }
+    items.reverse!
+    items.each do |i|
+      i.store(session[:auth_token])
+    end
+    
+    return items
+  end
+  
 end

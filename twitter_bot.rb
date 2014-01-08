@@ -11,6 +11,22 @@ class TwitterBot
     return @items
   end
 
+  def post(body)
+    Twitter.configure do |config|
+      config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
+      config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
+      config.oauth_token = @token
+      config.oauth_token_secret = @secret
+    end
+
+    begin
+      Twitter.update(body)
+    rescue => e
+      puts "**** There was an error with Twitter -> #{e} ****"
+      tweets = []
+    end
+  end
+
   def get_tweets(last_id, auth_token)
     Twitter.configure do |config|
       config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
