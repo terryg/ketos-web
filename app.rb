@@ -63,7 +63,12 @@ class App < Sinatra::Base
       if session[:tumblr]
         tumblr_bot = TumblrBot.new(session[:tumblr][:token],
                                  session[:tumblr][:token_secret])
-        tumblr_bot.post(body)
+        tumblr_bot.post(session[:tumblr][:blogname], body)
+      end
+
+      if session[:facebook]
+        graph = Koala::Facebook::API.new(session[:facebook][:token])
+        graph.put_connections("me", "feed", :message => body)
       end
 
       @items = make_items
@@ -170,14 +175,11 @@ class App < Sinatra::Base
     auth_hash = request.env['omniauth.auth']
 
     puts "**** /auth/#{params[:provider]}/callback"
-    puts "**** #{auth_hash}"
 
     provider = params[:provider]
     session[provider] = {}
     session[provider][:token] = auth_hash[:credentials][:token]
     session[provider][:token_secret] = auth_hash[:credentials][:secret]
-
-
     
     response = RestClient.post("#{ENV['KETOS_URL']}/provider",
                                {
@@ -188,11 +190,30 @@ class App < Sinatra::Base
                                  :access_token_secret => auth_hash[:credentials][:secret]
                                })
     puts "**** provider #{response.body}"
+
+    if provider == "tumblr"
+      @blogs = []
+      auth_hash[:extra][:raw_info][:blogs].each do |b|
+        @blogs << b[:name]
+      end
+
+      if @blogs.size > 1
+        haml :tumblr
+      end
+    end
+      
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
   # FAIL
   get '/auth/failure' do
+    redirect(to("http://#{request.host}:#{request.port}"), 303)
+  end
+
+  post "/tumblr" do
+    unless session[:auth_token].nil?
+      session[:tumblr][:blogname] = params[:blogname]
+    end
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
@@ -231,8 +252,9 @@ class App < Sinatra::Base
         
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
-        feed.each do |f|
-          # :BUG: 20130905 tgl: not ready for prime time
+        feed.each do |f|  
+          # :BUG: 20130905 tgl: not ready for saving, set 2nd arg ==
+          # false for now
           items << Item.new(f, false)
         end
         

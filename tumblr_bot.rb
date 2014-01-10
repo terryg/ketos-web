@@ -12,8 +12,7 @@ class TumblrBot
     return @items
   end
 
-  def post(body)
-
+  def post(blogname, body)
     Tumblr.configure do |config|
       config.consumer_key = ENV['TUMBLR_CONSUMER_KEY']
       config.consumer_secret = ENV['TUMBLR_CONSUMER_SECRET']
@@ -23,7 +22,7 @@ class TumblrBot
   
     begin
       client = Tumblr::Client.new
-      client.text("tlorber.tumblr.com", {:body => body})
+      client.text("#{blogname}.tumblr.com", {:body => body})
     rescue => e
       puts "**** There was an error with Tumblr -> #{e} ****"
     end

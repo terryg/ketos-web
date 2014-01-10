@@ -20,7 +20,7 @@ class Item
       self.name = a.from_user
       self.text = a.full_text
     elsif a.is_a?(Hash)
-      if a['post_url'] =~ /tumblr\.com/
+      if a['created_time'].nil?
         self.source = "tumblr"
         self.id = a['id']
         self.created_at = Time.at(a['timestamp'])
