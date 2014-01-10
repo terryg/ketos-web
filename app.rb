@@ -55,20 +55,38 @@ class App < Sinatra::Base
       body = params[:body]
 
       if session[:twitter]
-        twit_bot = TwitterBot.new(session[:twitter][:token],
-                                  session[:twitter][:token_secret])
-        twit_bot.post(body)
+        begin
+          puts "**** Twitter in session, posting..."
+          twit_bot = TwitterBot.new(session[:twitter][:token],
+                                    session[:twitter][:token_secret])
+          twit_bot.post(body)
+          puts "**** Done."
+        rescue => e
+          puts "**** Twitter had a problem --> #{e}"
+        end
       end
 
       if session[:tumblr]
-        tumblr_bot = TumblrBot.new(session[:tumblr][:token],
-                                 session[:tumblr][:token_secret])
-        tumblr_bot.post(session[:tumblr][:blogname], body)
+        begin
+          puts "**** Tumblr in session, posting..."
+          tumblr_bot = TumblrBot.new(session[:tumblr][:token],
+                                     session[:tumblr][:token_secret])
+          tumblr_bot.post(session[:tumblr][:uid], body)
+          puts "**** Done."
+        rescue => e
+          puts "**** Tumblr had a problem --> #{e}"
+        end
       end
 
       if session[:facebook]
-        graph = Koala::Facebook::API.new(session[:facebook][:token])
-        graph.put_connections("me", "feed", :message => body)
+        begin
+          puts "**** Facebook in session, posting..."
+          graph = Koala::Facebook::API.new(session[:facebook][:token])
+          graph.put_connections("me", "feed", :message => body)
+          puts "**** Done."
+        rescue => e
+          puts "**** Facebook had a problem --> #{e}"
+        end
       end
 
       @items = make_items
