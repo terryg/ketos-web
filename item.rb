@@ -19,6 +19,12 @@ class Item
       self.created_at = a.created_at
       self.name = a.from_user
       self.text = a.full_text
+      puts "**** #{a.media}"
+      if a.media.size > 0
+        puts "**** we got one"
+        puts "**** #{a.media[0]}"
+        self.img_url = a.media[0].media_url
+      end
     elsif a.is_a?(Hash)
       if a['created_time'].nil?
         self.source = "tumblr"
@@ -78,11 +84,15 @@ class Item
     #replace urls with links
     url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
     while s =~ url
-      name = $2
+      name = $2.gsub("\)", "").gsub("\(", "")
       s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{name}' >#{name}</a> "
     end
     
     s    
+  end
+  
+  def img_html
+    "<img src=\"#{self.img_url}\" />"
   end
 
   def permalink

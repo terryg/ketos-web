@@ -52,7 +52,12 @@
                       = i.name_html
                     %td
                       = i.text_html
+                      - if i.img_url
+                        <br />
+                        = i.img_html
                     %td
                       = i.permalink
+
+
 
   = haml :footer
