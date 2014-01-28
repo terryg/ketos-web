@@ -127,3 +127,28 @@ body {
 {
   color:red;
 }
+
+.stream-items li
+{
+  list-style-type:none;
+}
+
+.stream-item ol
+{
+  list-style-type:none;
+}
+
+.stream-item-header li
+{
+  display:inline;
+  list-style-type:none;
+  padding-right:20px;
+}
+
+.media-container
+{
+  display:block;
+  max-height:none;
+  max-width:438px;
+  vertical-align:top;
+}

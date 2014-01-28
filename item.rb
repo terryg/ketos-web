@@ -13,16 +13,15 @@ class Item
 
   def initialize(a, need_save)
     self.need_save = need_save
-    if a.is_a?(Twitter::Tweet)
+    if a.is_a?(Twitter::Tweet) 
+      puts "**** we got one"
+      puts "**** #{a}"
       self.source = "twitter"
       self.id = a.id
       self.created_at = a.created_at
       self.name = a.from_user
       self.text = a.full_text
-      puts "**** #{a.media}"
       if a.media.size > 0
-        puts "**** we got one"
-        puts "**** #{a.media[0]}"
         self.img_url = a.media[0].media_url
       end
     elsif a.is_a?(Hash)
@@ -61,6 +60,22 @@ class Item
     end
   end
 
+  def header_html
+    s = "<s>@</s>" if source == "twitter"
+    "<a href=\"#{name_url}\"><span>#{s}<b>#{name}</b></span><span>&rlm;</span></a>"
+  end
+
+  def name_url
+    if source == "twitter"
+      "https://twitter.com/#{name}"
+    elsif source == "facebook"
+      ids = self.id.split("_")
+      "https://www.facebook.com/#{ids[0]}"
+    else
+      "#{name}"
+    end
+  end
+
   def name_html
     if source == "twitter"
       "<a href=\"https://twitter.com/#{name}\">@#{name}</a>"
@@ -70,6 +85,30 @@ class Item
     else
       "#{name}"
     end
+  end
+
+  def time_since
+    diff_seconds = (Time.now - created_at).round
+    diff_minutes = (diff_seconds / 60).round
+    diff_hours = (diff_minutes / 60).round
+    diff_days = (diff_hours / 24).round
+    diff_years = (diff_days / 365).round
+
+    if diff_seconds < 60
+      "#{diff_seconds.to_s.strip}s"
+    elsif diff_minutes < 60
+      "#{diff_minutes.to_s.strip}m"
+    elsif diff_hours < 24
+      "#{diff_hours.to_s.strip}h"
+    elsif diff_days < 365
+      "#{diff_days.to_s.strip}d"
+    else
+      "#{diff_years.to_s.strip}y"
+    end
+  end
+
+  def time_html
+    "<small class=\"time\"><a href=\"#{perma_url}\"><span>#{time_since}</span></a></small>"
   end
 
   def text_html
@@ -93,6 +132,19 @@ class Item
   
   def img_html
     "<img src=\"#{self.img_url}\" />"
+  end
+
+  def perma_url
+    if source == "twitter"
+      "http://twitter.com/#{self.name}/status/#{self.id}"
+    elsif source == "tumblr"
+      "#{self.post_url}"
+    elsif source == "facebook"
+      ids = self.id.split("_")
+      "https://www.facebook.com/#{ids[0]}/posts/#{ids[1]}"
+    else
+      "#{name}"
+    end
   end
 
   def permalink

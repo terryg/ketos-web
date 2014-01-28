@@ -31,32 +31,26 @@
             %form{:action => "", :method => "post"}
               %fieldset
                 %label{:for => "body"} Update:
-                %textarea{:name => "body"}
+                %textarea{:name => "body", :rows => "2", :cols => "70"}
 
                 %input{:type => "submit", :value => "Send", :class => "button"}
 
         %div{:class=>"row"}
           %div{:class=>"col-lg-12"}
-            %table{:class=>"home-items"}
-              %thead
-                %tr
-                  %th
-                    From
-                  %th
-                    Msg
-                  %th
-              %tbody
-                - @items.each do |i|
-                  %tr
-                    %td
-                      = i.name_html
-                    %td
+
+            %ol{:class => "stream-items"}
+              - @items.each do |i|
+                %li
+                  %div{:class => "stream-item"}
+                    %div{:class => "stream-item-header"}
+                      = i.header_html
+                      = i.time_html
+                    %p{:class => "stream-text"}
                       = i.text_html
-                      - if i.img_url
-                        <br />
+                    - if i.img_url
+                      %div{:class => "media-container"}
                         = i.img_html
-                    %td
-                      = i.permalink
+                    %div{:class => "stream-item-footer"}
 
 
 
