@@ -27,8 +27,6 @@ class Item
       end
     elsif a.is_a?(Hash)
       if a['created_time'].nil?
-        puts "**** we got one"
-        puts "**** #{a.inspect}"
         self.source = "tumblr"
         self.id = a['id']
         self.created_at = Time.at(a['timestamp'])
