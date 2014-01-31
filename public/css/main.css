@@ -152,3 +152,24 @@ body {
   max-width:438px;
   vertical-align:top;
 }
+
+s {
+  text-decoration: none;
+}
+
+.displayname {
+  font-weight: bold;
+  color: #333;
+}
+
+.username {
+  color: #999;
+}
+
+
+.time {
+  position: relative;
+  float: right;
+  margin-top: 1px;
+  color: #bbb;
+}

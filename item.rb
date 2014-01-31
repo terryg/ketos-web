@@ -5,6 +5,7 @@ class Item
   attr_accessor :id
   attr_accessor :created_at
   attr_accessor :name
+  attr_accessor :display_name
   attr_accessor :text
   attr_accessor :need_save
   attr_accessor :source
@@ -14,12 +15,11 @@ class Item
   def initialize(a, need_save)
     self.need_save = need_save
     if a.is_a?(Twitter::Tweet) 
-      puts "**** we got one"
-      puts "**** #{a}"
       self.source = "twitter"
       self.id = a.id
       self.created_at = a.created_at
-      self.name = a.from_user
+      self.name = a.user.screen_name
+      self.display_name = a.user.name
       self.text = a.full_text
       if a.media.size > 0
         self.img_url = a.media[0].media_url
@@ -61,8 +61,23 @@ class Item
   end
 
   def header_html
-    s = "<s>@</s>" if source == "twitter"
-    "<a href=\"#{name_url}\"><span>#{s}<b>#{name}</b></span><span>&rlm;</span></a>"
+    if source == "twitter"
+      "<a href=\"#{name_url}\">
+         <strong class=\"displayname\">#{display_name}</strong>
+         <span>&rlm;</span>
+         <span class=\"username\">
+           <s>@</s><b>#{name}</b>
+         </span>
+       </a>"
+    else
+      "<a href=\"#{name_url}\">
+         <strong class=\"displayname\">#{name}</strong>
+         <span>&rlm;</span>
+         <span class=\"username\">
+           &nbsp;
+         </span>
+       </a>"
+    end
   end
 
   def name_url
@@ -71,6 +86,8 @@ class Item
     elsif source == "facebook"
       ids = self.id.split("_")
       "https://www.facebook.com/#{ids[0]}"
+    elsif source == "tumblr"
+      "http://#{name}.tumblr.com"
     else
       "#{name}"
     end
