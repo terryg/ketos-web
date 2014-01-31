@@ -11,7 +11,8 @@ class Item
   attr_accessor :source
   attr_accessor :img_url
   attr_accessor :post_url
-
+  attr_accessor :title
+  
   def initialize(a, need_save)
     self.need_save = need_save
     if a.is_a?(Twitter::Tweet) 
@@ -26,10 +27,13 @@ class Item
       end
     elsif a.is_a?(Hash)
       if a['created_time'].nil?
+        puts "**** we got one"
+        puts "**** #{a.inspect}"
         self.source = "tumblr"
         self.id = a['id']
         self.created_at = Time.at(a['timestamp'])
-        self.name = a['post_author']
+        self.title = a['source_title']
+        self.name = a['blog_name']
         if a['type'] == "text"
           self.text = a['body']
         elsif a['type'] == "photo"
@@ -67,6 +71,15 @@ class Item
          <span>&rlm;</span>
          <span class=\"username\">
            <s>@</s><b>#{name}</b>
+         </span>
+       </a>"
+    elsif source == "tumblr"
+      s = "Source: <em>#{title}</em>" unless title.nil?
+      "<a href=\"#{name_url}\">
+         <strong class=\"displayname\">#{name}</strong>
+         <span>&rlm;</span>
+         <span class=\"title\">
+           #{s}
          </span>
        </a>"
     else
