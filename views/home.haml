@@ -1,7 +1,14 @@
 %div{:id=>"wrap"}
   %div{:id=>"container"}
     %div{:class=>"page-header-nav"}
-      <a href="/logout">logout</a>
+      %ol
+        %li
+          <a href="/logout">logout</a>
+        %li
+          %strong
+            home
+        %li
+          <a href="/account">account</a>
 
     %div{:class=>"page-header"}
       %h1{:class=>"home-heading"}

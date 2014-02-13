@@ -4,6 +4,11 @@ body {
   padding-top: 40px;
   padding-bottom: 40px;
   background-color: #eee;
+/*  background: url(/ketos.png) no-repeat center center fixed; */
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
 }
 
 /* Wrapper for page content to push down footer */
@@ -41,6 +46,7 @@ body {
   width: auto;
   max-width: 680px;
   padding: 0 15px;
+  color: #000;
 }
 .container .credit {
   margin: 20px 0;
@@ -102,6 +108,13 @@ body {
   margin: 0 auto;
 }
 
+.page-header-nav li,
+.provider {
+  display: inline;
+  list-style-type: none;
+  padding-right: 20px;
+}
+
 .home-items table
 {
   border-collapse:collapse;
@@ -131,6 +144,7 @@ body {
 .stream-items li
 {
   list-style-type:none;
+  background-color: #f5f5f5;
 }
 
 .stream-item ol

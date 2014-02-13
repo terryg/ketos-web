@@ -17,6 +17,7 @@ require './tumblr_bot'
 
 class App < Sinatra::Base
   enable :sessions
+  enable :methodoverride
 
   configure :development, :test do
     set :host, 'localhost:3000'
@@ -46,7 +47,13 @@ class App < Sinatra::Base
     if request.env['HTTP_HOST'].match(/herokuapp\.com/)
       redirect 'http://www.ketosapp.com', 301
     end
+
+    if session[:auth_token].nil? && !['/', '/login', '/register'].include?(request.path_info)
+      redirect '/'
+    end
   end
+
+  PROVIDERS = ['twitter', 'tumblr', 'facebook']
 
   post '/' do
     if session[:auth_token].nil?
@@ -184,6 +191,25 @@ class App < Sinatra::Base
     haml :login
   end
 
+  get '/account' do
+    @providers = []
+    PROVIDERS.each do |p|
+      @providers << p if session[p]
+    end
+    haml :account
+  end
+
+  delete '/account/delete/:provider' do
+    response = RestClient.delete("#{ENV['KETOS_URL']}/provider/delete/#{params[:provider]}",
+                                 :headers => {'Authorization' => "Token #{session[:auth_token]}"})
+    puts "**** provider delete #{response.code}"
+    case response.code
+    when 200
+      session[params[:provider].to_sym] = nil
+    end
+    redirect '/account'
+  end
+
   get '/logout' do
     session.clear
     redirect '/'
@@ -199,11 +225,10 @@ class App < Sinatra::Base
     session[provider][:token] = auth_hash[:credentials][:token]
     session[provider][:token_secret] = auth_hash[:credentials][:secret]
     
-    response = RestClient.post("#{ENV['KETOS_URL']}/provider",
+    response = RestClient.post("#{ENV['KETOS_URL']}/provider/create/#{provider}",
                                {
                                  :token => session[:auth_token],
                                  :uid => auth_hash[:uid],
-                                 :provider => provider,
                                  :access_token => auth_hash[:credentials][:token],
                                  :access_token_secret => auth_hash[:credentials][:secret]
                                })
@@ -217,10 +242,12 @@ class App < Sinatra::Base
 
       if @blogs.size > 1
         haml :tumblr
+      else
+        redirect(to("http://#{request.host}:#{request.port}"), 303)
       end
+    else
+      redirect(to("http://#{request.host}:#{request.port}"), 303)
     end
-      
-    redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
   # FAIL
