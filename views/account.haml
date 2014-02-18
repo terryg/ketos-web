@@ -1,0 +1,40 @@
+%div{:id=>"wrap"}
+  %div{:id=>"container"}
+    %div{:class=>"page-header-nav"}
+      %ol
+        %li
+          <a href="/logout">logout</a>
+        %li
+          <a href="/">home</a>
+        %li
+          %strong
+            account
+
+    %div{:class=>"page-header"}
+      %h1{:class=>"home-heading"}
+        KETOS APP
+
+    %div{:class=>"page"}
+      %div{:class=>"home-account"}
+
+        %div{:class=>"row"}
+          %div{:class=>"col-lg-12"}
+            %ol{:class=>"providers"}
+              - @providers.each do |p|
+                %li
+                  %h2
+                    = p
+                  - if session[p]
+                    %form{:class=>"account-delete", :method=>"post",:action=>"/account/delete/#{ p}"}
+                      %input{:type=>"hidden",:name=>"_method",:value=>"delete"}
+                      %button{:class=>"btn btn-small", :type=>"submit"}
+                        Delete?
+                  - else
+
+                    %a{:href=>"/auth/#{p}"}
+                      = "Add #{p}"
+
+                  
+
+
+  = haml :footer

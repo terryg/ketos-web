@@ -192,9 +192,10 @@ class App < Sinatra::Base
   end
 
   get '/account' do
-    @providers = []
+    @providers = PROVIDERS
+    @active = []
     PROVIDERS.each do |p|
-      @providers << p if session[p]
+      @active << p
     end
     haml :account
   end
@@ -254,10 +255,17 @@ class App < Sinatra::Base
   get '/auth/failure' do
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
-
+  
   post "/tumblr" do
     unless session[:auth_token].nil?
-      session[:tumblr][:blogname] = params[:blogname]
+      response = RestClient.put("#{ENV['KETOS_URL']}/provider/update/tumblr",
+                                { :uid => params[:blogname] },
+                                { :headers => {'Authorization' => "Token #{session[:auth_token]}"}})
+      puts "**** provider put #{response.code}"
+      case response.code
+      when 200
+        session[:tumblr][:uid] = params[:blogname]
+      end
     end
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
