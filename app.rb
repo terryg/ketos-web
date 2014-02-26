@@ -178,6 +178,7 @@ class App < Sinatra::Base
             session[j['provider']] = {}
             session[j['provider']][:token] = j['access_token']
             session[j['provider']][:token_secret] = j['access_token_secret']
+            session[j['provider']][:uid] = j['uid']
           end
           
           redirect to("http://#{request.host}:#{request.port}"), 303
