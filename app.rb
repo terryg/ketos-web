@@ -20,9 +20,9 @@ class App < Sinatra::Base
   enable :methodoverride
 
   configure :development, :test do
-    set :host, 'localhost:3000'
+    set :host, 'skeely-framed.codio.io:3000'
     set :force_ssl, false
-    OmniAuth.config.full_host = 'http://localhost:3000'
+    OmniAuth.config.full_host = 'http://skeely-framed.codio.io:3000'
   end
   configure :staging do
     set :host, 'ketos-web-staging.herokuapp.com'
@@ -38,7 +38,7 @@ class App < Sinatra::Base
   end
 
   use OmniAuth::Builder do
-    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'read_stream', :display => 'popup'
+    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'read_stream,publish_stream', :display => 'popup'
     provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
   end
