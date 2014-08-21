@@ -271,12 +271,8 @@ class App < Sinatra::Base
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
-  protected
-  
-  def make_items
-    items = []
-    
-    if session[:twitter]
+  get "/feed/:provider" do
+    if params[:provider] == "twitter" and session[:twitter]
       twit_bot = TwitterBot.new(session[:twitter][:token],
                                 session[:twitter][:token_secret])
       
@@ -284,9 +280,16 @@ class App < Sinatra::Base
       session[:twitter][:last_id] = twit_bot.get_tweets(last_id,
                                                         session[:auth_token])
       
-      items.concat(twit_bot.items)
-    end # if session[:twitter]
+      content_type :json
+      twit_bot.items.map { |o| o.to_json }.to_json
+    end # if :provider == "twitter" and session[:twitter]
+  end
 
+  protected
+  
+  def make_items
+    items = []
+    
     if session[:tumblr]
       tumblr_bot = TumblrBot.new(session[:tumblr][:token],
                                  session[:tumblr][:token_secret])

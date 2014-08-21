@@ -5,6 +5,7 @@ class TwitterBot
   def initialize(token, secret)
     @token = token
     @secret = secret
+    @save = false
   end
 
   def items
@@ -56,18 +57,20 @@ class TwitterBot
       
       @items << Item.new(t, need_save)
     end
-    
-    tweets.each do |t|
-      if ids_to_save.include?(t.id)
-        response = RestClient.post("#{ENV['KETOS_URL']}/item",
-                                   {
-                                     :token => auth_token,
-                                     :created_at => t.created_at,
-                                     :text => t.full_text
-                                   })
+
+    if @save == true
+      tweets.each do |t|
+        if ids_to_save.include?(t.id)
+          response = RestClient.post("#{ENV['KETOS_URL']}/item",
+          {
+            :token => auth_token,
+            :created_at => t.created_at,
+            :text => t.full_text
+            })
         
-        if last_id < t.id
-          last_id = t.id
+          if last_id < t.id
+            last_id = t.id
+          end
         end
       end
     end

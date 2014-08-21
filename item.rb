@@ -1,4 +1,5 @@
 require 'twitter'
+require 'json'
 
 class Item
 
@@ -12,6 +13,21 @@ class Item
   attr_accessor :img_url
   attr_accessor :post_url
   attr_accessor :title
+
+  def to_json(*a)
+    {
+      'id'           => self.id,
+      'created_at'   => self.created_at,
+      'name'         => self.name,
+      'display_name' => self.display_name,
+      'text'         => self.text,
+      'need_save'    => self.need_save,
+      'source'       => self.source,
+      'img_url'      => self.img_url,
+      'post_url'     => self.post_url,
+      'title'        => self.title
+    }.to_json(*a)
+  end
   
   def initialize(a, need_save)
     self.need_save = need_save

@@ -8,13 +8,9 @@
 %div
   %img{:src => "ketos.png"}
 
-- if @current_user
   %div
-    Logged in
-
-- else
-  %div
-
+    - if @current_user
+      Logged in
 
 %div
   &nbsp;
