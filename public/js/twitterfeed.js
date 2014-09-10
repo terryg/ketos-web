@@ -12,11 +12,12 @@ $(document).ready(function () {
 	
 	var headerHTML = '';
 	var loadingHTML = '';
+	headerHTML += '<a href="https://twitter.com/" target="_blank"><img src="images/twitter-bird-light.png" width="34" style="float:left;padding:3px 12px 0px 6px" alt="twitter bird" /></a>';
 	loadingHTML += '<div id="loading-container"><img src="images/ajax-loader.gif" width="32" height="32" alt="tweet loader" /></div>';
 	
 	$('#twitter-feed').html(headerHTML + loadingHTML);
 	 
-    $.getJSON('/feed/twitter', 
+    $.getJSON('/feed/facebook', 
         function(feeds) {   
 		      var feedHTML = '';
           var displayCounter = 1;         
@@ -24,6 +25,7 @@ $(document).ready(function () {
             var f = $.parseJSON(feeds[i]);
             var tweetscreenname = f.display_name;
             var tweetusername = f.name;
+            var profileimage = f.profile_image_url;
             var status = f.text; 
             var isaretweet = false;
             var isdirect = false;
@@ -47,7 +49,8 @@ $(document).ready(function () {
 							feedHTML += headerHTML;
 						}
 									 
-						feedHTML += '<div class="twitter-article" id="tw'+displayCounter+'">'; 										                 
+						feedHTML += '<div class="twitter-article" id="tw'+displayCounter+'">'; 	
+         		feedHTML += '<div class="twitter-pic"><a href="https://twitter.com/'+tweetusername+'" target="_blank"><img src="'+profileimage+'"images/twitter-feed-icon.png" width="42" height="42" alt="twitter icon" /></a></div>';							                 
 						feedHTML += '<div class="twitter-text"><p><span class="tweetprofilelink"><strong><a href="https://twitter.com/'+tweetusername+'" target="_blank">'+tweetscreenname+'</a></strong> <a href="https://twitter.com/'+tweetusername+'" target="_blank">@'+tweetusername+'</a></span><span class="tweet-time"><a href="https://twitter.com/'+tweetusername+'/status/'+tweetid+'" target="_blank">'+relative_time(f.created_at)+'</a></span><br/>'+status+'</p>';
 						
 						if ((isaretweet == true) && (showretweetindicator == true)) {

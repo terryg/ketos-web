@@ -283,6 +283,34 @@ class App < Sinatra::Base
       content_type :json
       twit_bot.items.map { |o| o.to_json }.to_json
     end # if :provider == "twitter" and session[:twitter]
+
+    if params[:provider] == "facebook" and session[:facebook]
+      graph = Koala::Facebook::API.new(session[:facebook][:token])
+      puts "**** Accessing FB feed..."
+      begin
+        feed = graph.get_connections("me", "home") 
+        items = []
+        session[:facebook][:last_created_time] ||= 0
+        ids_to_save = []
+        feed.each do |f|  
+          # :BUG: 20130905 tgl: not ready for saving, set 2nd arg ==
+          # false for now
+          items << Item.new(f, false)
+        end
+        
+        content_type :json
+
+      rescue Koala::Facebook::APIError => e
+        puts "**** there was a problem"
+        puts "**** #{e.response_body}"
+        puts "**** #{e.message}"
+        feed = []
+        session[:facebook] = nil
+      end
+      puts "**** Done."
+      
+      items.map { |o| o.to_json }.to_json
+    end # if session['facebook']
   end
 
   protected
@@ -301,30 +329,7 @@ class App < Sinatra::Base
       items.concat(tumblr_bot.items)    
     end # if session[:tumblr]
 
-    if session[:facebook]
-      graph = Koala::Facebook::API.new(session[:facebook][:token])
-      puts "**** Accessing FB feed..."
-      begin
-        feed = graph.get_connections("me", "home") 
-        
-        session[:facebook][:last_created_time] ||= 0
-        ids_to_save = []
-        feed.each do |f|  
-          # :BUG: 20130905 tgl: not ready for saving, set 2nd arg ==
-          # false for now
-          items << Item.new(f, false)
-        end
-        
-      rescue Koala::Facebook::APIError => e
-        puts "**** there was a problem"
-        puts "**** #{e.response_body}"
-        puts "**** #{e.message}"
-        feed = []
-        session[:facebook] = nil
-      end
-      puts "**** Done."
-      
-    end # if session['facebook']
+
     
     items.sort_by!{ |i| i.created_at }
     items.reverse!

@@ -13,19 +13,21 @@ class Item
   attr_accessor :img_url
   attr_accessor :post_url
   attr_accessor :title
+  attr_accessor :profile_image_url
 
   def to_json(*a)
     {
-      'id'           => self.id,
-      'created_at'   => self.created_at,
-      'name'         => self.name,
-      'display_name' => self.display_name,
-      'text'         => self.text,
-      'need_save'    => self.need_save,
-      'source'       => self.source,
-      'img_url'      => self.img_url,
-      'post_url'     => self.post_url,
-      'title'        => self.title
+      'id'            => self.id,
+      'created_at'    => self.created_at,
+      'name'          => self.name,
+      'display_name'  => self.display_name,
+      'text'          => self.text,
+      'need_save'     => self.need_save,
+      'source'        => self.source,
+      'img_url'       => self.img_url,
+      'post_url'      => self.post_url,
+      'title'         => self.title,
+      'profile_image_url' => self.profile_image_url
     }.to_json(*a)
   end
   
@@ -37,6 +39,7 @@ class Item
       self.created_at = a.created_at
       self.name = a.user.screen_name
       self.display_name = a.user.name
+      self.profile_image_url = a.user.profile_image_url_https;
       self.text = a.full_text
       if a.media.size > 0
         self.img_url = a.media[0].media_url
@@ -66,6 +69,8 @@ class Item
           self.text = a['message']
         elsif a['story']
           self.text = a['story']
+        else
+          self.text = ""
         end
         self.img_url = a['picture']
       end
