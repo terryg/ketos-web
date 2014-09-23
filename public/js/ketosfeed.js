@@ -17,7 +17,7 @@ $(document).ready(function () {
 	
   $('#twitter-feed').html(headerHTML + loadingHTML);
 	
-	$.getJSON('/feed/twitter', function(feeds) {
+	$.getJSON('/feed/facebook', function(feeds) {
 		fetchFeed(feeds);
 
 
@@ -43,7 +43,7 @@ $(document).ready(function () {
 		alert("error: " + error);
 	});
 
-	$.getJSON('/feed/facebook', function(feeds) {
+	$.getJSON('/feed/twitter', function(feeds) {
     fetchFeed(feeds);
 	}).error(function(jqXHR, textStatus, errorThrown) {
 		var error = "";
