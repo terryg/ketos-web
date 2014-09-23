@@ -272,6 +272,8 @@ class App < Sinatra::Base
   end
 
   get "/feed/:provider" do
+    items = []
+
     if params[:provider] == "twitter" and session[:twitter]
       twit_bot = TwitterBot.new(session[:twitter][:token],
                                 session[:twitter][:token_secret])
@@ -279,9 +281,11 @@ class App < Sinatra::Base
       last_id = session[:twitter][:last_id] || 0
       session[:twitter][:last_id] = twit_bot.get_tweets(last_id,
                                                         session[:auth_token])
+
+      puts "**** feed of twitter"
+      puts "**** for #{twit_bot.items.size} items"
       
-      content_type :json
-      twit_bot.items.map { |o| o.to_json }.to_json
+      items = twit_bot.items
     end # if :provider == "twitter" and session[:twitter]
 
     if params[:provider] == "facebook" and session[:facebook]
@@ -289,7 +293,7 @@ class App < Sinatra::Base
       puts "**** Accessing FB feed..."
       begin
         feed = graph.get_connections("me", "home") 
-        items = []
+        
         session[:facebook][:last_created_time] ||= 0
         ids_to_save = []
         feed.each do |f|  
@@ -298,8 +302,6 @@ class App < Sinatra::Base
           items << Item.new(f, false)
         end
         
-        content_type :json
-
       rescue Koala::Facebook::APIError => e
         puts "**** there was a problem"
         puts "**** #{e.response_body}"
@@ -308,9 +310,11 @@ class App < Sinatra::Base
         session[:facebook] = nil
       end
       puts "**** Done."
-      
-      items.map { |o| o.to_json }.to_json
     end # if session['facebook']
+
+
+    content_type :json
+    items.map{ |o| o.to_json }.to_json
   end
 
   protected
