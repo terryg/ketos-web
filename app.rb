@@ -312,6 +312,16 @@ class App < Sinatra::Base
       puts "**** Done."
     end # if session['facebook']
 
+		if params[:provider] == "tumblr" && session[:tumblr]
+      tumblr_bot = TumblrBot.new(session[:tumblr][:token],
+                                 session[:tumblr][:token_secret])
+      
+      last_id = session[:tumblr][:last_id] || 0
+      session[:tumblr][:last_id] = tumblr_bot.get_posts(last_id,
+                                                        session[:auth_token])
+      
+      items.concat(tumblr_bot.items)    
+    end # if session[:tumblr]
 
     content_type :json
     items.map{ |o| o.to_json }.to_json
@@ -322,16 +332,7 @@ class App < Sinatra::Base
   def make_items
     items = []
     
-    if session[:tumblr]
-      tumblr_bot = TumblrBot.new(session[:tumblr][:token],
-                                 session[:tumblr][:token_secret])
-      
-      last_id = session[:tumblr][:last_id] || 0
-      session[:tumblr][:last_id] = tumblr_bot.get_posts(last_id,
-                                                        session[:auth_token])
-      
-      items.concat(tumblr_bot.items)    
-    end # if session[:tumblr]
+
 
 
     

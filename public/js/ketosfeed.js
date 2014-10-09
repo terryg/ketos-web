@@ -16,6 +16,28 @@ $(document).ready(function () {
 	
   $('#feed').html(headerHTML + loadingHTML);
 	
+	$.getJSON('/feed/tumblr', function(feeds) {
+		fetchFeed('tumblr', feeds);
+	}).error(function(jqXHR, textStatus, errorThrown) {
+		var error = "";
+		if (jqXHR.status === 0) {
+			error = 'Connection problem. Check file path and www vs non-www in getJSON request';
+		} else if (jqXHR.status == 404) {
+			error = 'Requested page not found. [404]';
+		} else if (jqXHR.status == 500) {
+			error = 'Internal Server Error [500].';
+		} else if (exception === 'parsererror') {
+			error = 'Requested JSON parse failed.';
+		} else if (exception === 'timeout') {
+			error = 'Time out error.';
+		} else if (exception === 'abort') {
+			error = 'Ajax request aborted.';
+		} else {
+			error = 'Uncaught Error.\n' + jqXHR.responseText;
+		}	
+		alert("error: " + error);
+	});
+
 	$.getJSON('/feed/facebook', function(feeds) {
 		fetchFeed('facebook', feeds);
 
@@ -73,6 +95,7 @@ $(document).ready(function () {
 		this.profile_image_url = f.profile_image_url;
 		this.text = f.text;
 		this.img_url = f.img_url;
+		this.post_url = f.post_url;
 		this.headerHtml = headerHtml;
 		this.nameUrl = nameUrl;
 		this.timeHtml = timeHtml;
@@ -92,6 +115,17 @@ $(document).ready(function () {
 			output += '    <s>@</s><b>'+this.name+'</b>';
 			output += '  </span>';
 			output += '</a>';
+		} else if (this.source == 'tumblr') {
+			var s = '';
+			if (this.title) {
+				s = 'Source: <em>'+this.title+'</em>'
+			}
+			output += '<a href="'+this.nameUrl()+'">';
+			output += '  <strong class="displayname">'+this.name+'</strong>';
+			output += '  <span>&rlm;</span>';
+			output += '  <span class="title">'+s+'</span>';
+			output += '</a>';
+    
 		} else {
 			output += '<a href="'+this.nameUrl()+'">'
 			output += '  <strong class="displayname">'+this.name+'</strong>';
@@ -127,6 +161,10 @@ $(document).ready(function () {
 	function textHtml() {
 		s = this.text;
 
+		if (this.source != 'tumblr') {
+			s = addlinks(s);
+		}
+
 		return s;
 	}
 
@@ -141,6 +179,8 @@ $(document).ready(function () {
 		} else if (this.source == 'facebook') {
 			var ids = this.id.split('_');
 			output += 'https://www.facebook.com/'+ids[0]+'/posts/'+ids[1];
+		} else if (this.source == 'tumblr') {
+			output += this.post_url;
 		} else {	
 			output += this.name;
 		}
@@ -182,13 +222,13 @@ $(document).ready(function () {
 		});
 		
 		//Add link to @usernames used within tweets
-		data = data.replace(/\B@([_a-z0-9]+)/ig, function(reply) {
-			return '<a href="http://twitter.com/'+reply.substring(1)+'" style="font-weight:lighter;" target="_blank">'+reply.charAt(0)+reply.substring(1)+'</a>';
-		});
-		//Add link to #hastags used within tweets
-		data = data.replace(/\B#([_a-z0-9]+)/ig, function(reply) {
-			return '<a href="https://twitter.com/search?q='+reply.substring(1)+'" style="font-weight:lighter;" target="_blank">'+reply.charAt(0)+reply.substring(1)+'</a>';
-		});
+//		data = data.replace(/\B@([_a-z0-9]+)/ig, function(reply) {
+//			return '<a href="http://twitter.com/'+reply.substring(1)+'" style="font-weight:lighter;" target="_blank">'+reply.charAt(0)+reply.substring(1)+'</a>';
+//		});
+//		//Add link to #hastags used within tweets
+//		data = data.replace(/\B#([_a-z0-9]+)/ig, function(reply) {
+//			return '<a href="https://twitter.com/search?q='+reply.substring(1)+'" style="font-weight:lighter;" target="_blank">'+reply.charAt(0)+reply.substring(1)+'</a>';
+//		});
 		return data;
 	}
 	
@@ -224,4 +264,4 @@ $(document).ready(function () {
 		}
 	}
 
-});q
+});
