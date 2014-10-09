@@ -193,14 +193,18 @@ $(document).ready(function () {
 	}
 	
 	
-	function relative_time(time_value) {
-		var values = time_value.split(" ");
-		time_value = values[1] + " " + values[2] + ", " + values[5] + " " + values[3];
-		var parsed_date = Date.parse(time_value);
-		var relative_to = (arguments.length > 1) ? arguments[1] : new Date();
+	function relative_time(created_at) {
+		var values = created_at.split(' ');
+		var dvalues = values[0].split('-');
+		var tvalues = values[1].split(':');
+
+		var parsed_date = Date.parse(dvalues[0], dvalues[1], dvalues[2], tvalues[0], tvalues[1], tvalues[2]);
+
+		var relative_to = new Date();
 		var delta = parseInt((relative_to.getTime() - parsed_date) / 1000);
-		var shortdate = time_value.substr(4,2) + " " + time_value.substr(0,3);
-		delta = delta + (relative_to.getTimezoneOffset() * 60);
+		var m_names = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+		var shortdate = dvalues[2]+' '+m_names[dvalues[1]-1];
+		delta = delta - (relative_to.getTimezoneOffset() * 60);
 		
 		if (delta < 60) {
 			return '1m';
@@ -220,4 +224,4 @@ $(document).ready(function () {
 		}
 	}
 
-});
+});q
