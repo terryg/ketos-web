@@ -12,13 +12,12 @@ $(document).ready(function () {
 	
 	var headerHTML = '';
 	var loadingHTML = '';
-	headerHTML += '<a href="https://twitter.com/" target="_blank"><img src="images/twitter-bird-light.png" width="34" style="float:left;padding:3px 12px 0px 6px" alt="twitter bird" /></a>';
 	loadingHTML += '<div id="loading-container"><img src="images/ajax-loader.gif" width="32" height="32" alt="tweet loader" /></div>';
 	
-  $('#twitter-feed').html(headerHTML + loadingHTML);
+  $('#feed').html(headerHTML + loadingHTML);
 	
 	$.getJSON('/feed/facebook', function(feeds) {
-		fetchFeed(feeds);
+		fetchFeed('facebook', feeds);
 
 
 
@@ -44,7 +43,7 @@ $(document).ready(function () {
 	});
 
 	$.getJSON('/feed/twitter', function(feeds) {
-    fetchFeed(feeds);
+		fetchFeed('twitter', feeds);
 	}).error(function(jqXHR, textStatus, errorThrown) {
 		var error = "";
 		if (jqXHR.status === 0) {
@@ -65,77 +64,114 @@ $(document).ready(function () {
 		alert("error: " + error);
 	});
 
-	function fetchFeed(feeds) {   
+  function KetosItem(provider, f) {
+		this.source = provider;
+		this.id = f.id;
+		this.created_at = f.created_at;
+		this.name = f.name;
+		this.display_name = f.display_name;
+		this.profile_image_url = f.profile_image_url;
+		this.text = f.text;
+		this.img_url = f.img_url;
+		this.headerHtml = headerHtml;
+		this.nameUrl = nameUrl;
+		this.timeHtml = timeHtml;
+		this.textHtml = textHtml;
+		this.imgHtml = imgHtml;
+		this.permaUrl = permaUrl;
+		return this;
+  }
+  
+  function headerHtml() {
+		var output = '';
+		if (this.source == 'twitter') {
+			output += '<a href="'+this.nameUrl()+'">'
+			output += '  <strong class="displayname">'+this.display_name+'</strong>';
+			output += '  <span>&rlm;</span>';
+			output += '  <span class="username">';
+			output += '    <s>@</s><b>'+this.name+'</b>';
+			output += '  </span>';
+			output += '</a>';
+		} else {
+			output += '<a href="'+this.nameUrl()+'">'
+			output += '  <strong class="displayname">'+this.name+'</strong>';
+			output += '  <span>&rlm;</span>';
+			output += '  <span class="username">';
+			output += '    &nbsp;';
+			output += '  </span>';
+			output += '</a>';
+		}
+
+		return output;
+	}
+
+	function nameUrl() {
+		var output = '';
+		if (this.source == 'twitter') {
+			output += 'https://twitter.com/'+this.name;
+		} else if (this.source == 'facebook') {
+			var ids = this.id.split('_');
+			output += 'https://www.facebook.com/'+ids[0];
+		} else if (this.source == 'tumblr') {
+			output += 'http://'+this.name+'.tumblr.com';
+		} else {
+			output += this.name;
+		}
+		return output;
+	}
+
+	function timeHtml() {
+		return '<small class="time"><a href="'+this.permaUrl()+'"><span>'+relative_time(this.created_at)+'</span></a></small>';
+	}
+
+	function textHtml() {
+		s = this.text;
+
+		return s;
+	}
+
+  function imgHtml() {
+		return '<img src="'+this.img_url+'" />';
+	}
+
+	function permaUrl() {
+		var output = '';
+		if (this.source == 'twitter') {
+			output += 'http://twitter.com/'+this.name+'/status/'+this.id;
+		} else if (this.source == 'facebook') {
+			var ids = this.id.split('_');
+			output += 'https://www.facebook.com/'+ids[0]+'/posts/'+ids[1];
+		} else {	
+			output += this.name;
+		}
+		return output;
+	}
+
+	function fetchFeed(provider, feeds) {   
 		var feedHTML = '';
-		var displayCounter = 1;         
 		for (var i=0; i<feeds.length; i++) {
 			var f = $.parseJSON(feeds[i]);
-			var tweetscreenname = f.display_name;
-			var tweetusername = f.name;
-			var profileimage = f.profile_image_url;
-			var status = f.text; 
-			var isaretweet = false;
-			var isdirect = false;
-			var tweetid = f.id;
-			
-			//Check to see if the tweet is a direct message
-			if (f.text.substr(0,1) == "@") {
-				isdirect = true;
-			}
+			var kitem = KetosItem(provider, f);
 			
 			console.log(f);
-			
-			//Generate twitter feed HTML based on selected options
-			if (((showretweets == true) || ((isaretweet == false) && (showretweets == false))) && ((showdirecttweets == true) || ((showdirecttweets == false) && (isdirect == false)))) { 
-				if ((f.text.length > 1) && (displayCounter <= displaylimit)) {             
-					if (showtweetlinks == true) {
-						status = addlinks(status);
-					}
 					
-					if (displayCounter == 1) {
-						feedHTML += headerHTML;
-					}
-					
-					feedHTML += '<div class="twitter-article" id="tw'+displayCounter+'">'; 	
-					feedHTML += '<div class="twitter-pic"><a href="https://twitter.com/'+tweetusername+'" target="_blank"><img src="'+profileimage+'"images/twitter-feed-icon.png" width="42" height="42" alt="twitter icon" /></a></div>';							                 
-					feedHTML += '<div class="twitter-text"><p><span class="tweetprofilelink"><strong><a href="https://twitter.com/'+tweetusername+'" target="_blank">'+tweetscreenname+'</a></strong> <a href="https://twitter.com/'+tweetusername+'" target="_blank">@'+tweetusername+'</a></span><span class="tweet-time"><a href="https://twitter.com/'+tweetusername+'/status/'+tweetid+'" target="_blank">'+relative_time(f.created_at)+'</a></span><br/>'+status+'</p>';
-					
-					if ((isaretweet == true) && (showretweetindicator == true)) {
-						feedHTML += '<div id="retweet-indicator"></div>';
-					}						
-					if (showtweetactions == true) {
-						feedHTML += '<div id="twitter-actions"><div class="intent" id="intent-reply"><a href="https://twitter.com/intent/tweet?in_reply_to='+tweetid+'" title="Reply"></a></div><div class="intent" id="intent-retweet"><a href="https://twitter.com/intent/retweet?tweet_id='+tweetid+'" title="Retweet"></a></div><div class="intent" id="intent-fave"><a href="https://twitter.com/intent/favorite?tweet_id='+tweetid+'" title="Favourite"></a></div></div>';
-						}
-					
-					feedHTML += '</div>';
-					feedHTML += '</div>';
-					displayCounter++;
-				}   
+			feedHTML += '<div class="stream-item">';
+			feedHTML += '  <div class="stream-item-header">';
+			feedHTML += '    '+kitem.headerHtml();
+			feedHTML += '    '+kitem.timeHtml();
+			feedHTML += '  </div>';
+			feedHTML += '  <p class="stream-text">'+kitem.textHtml();
+			if (kitem.img_url) {
+				feedHTML += '<div class="media-container">'+kitem.imgHtml()+'</div>';
 			}
-		}
-		
-		$('#twitter-feed').html(feedHTML);
-		
-		//Add twitter action animation and rollovers
-		if (showtweetactions == true) {				
-			$('.twitter-article').hover(function(){
-				$(this).find('#twitter-actions').css({'display':'block', 'opacity':0, 'margin-top':-20});
-				$(this).find('#twitter-actions').animate({'opacity':1, 'margin-top':0},200);
-			}, function() {
-				$(this).find('#twitter-actions').animate({'opacity':0, 'margin-top':-20},120, function(){
-					$(this).css('display', 'none');
-				});
-			});			
+			feedHTML += '  </p>';
+			feedHTML += '  <div class="stream-item-footer"></div>';
+			feedHTML += '</div>';
 			
-			//Add new window for action clicks
-			
-			$('#twitter-actions a').click(function(){
-				var url = $(this).attr('href');
-				window.open(url, 'tweet action window', 'width=580,height=500');
-				return false;
-			});
 		}
-				
+	
+		feedHTML += $('#feed').html();
+		$('#feed').html(feedHTML);
 	}
 	
 	//Function modified from Stack Overflow
