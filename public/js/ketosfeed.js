@@ -12,7 +12,7 @@ $(document).ready(function () {
 	
 	var headerHTML = '';
 	var loadingHTML = '';
-	loadingHTML += '<div id="loading-container"><img src="images/ajax-loader.gif" width="32" height="32" alt="tweet loader" /></div>';
+	loadingHTML = ''; // '<div id="loading-container"><img src="images/ajax-loader.gif" width="32" height="32" alt="tweet loader" /></div>';
 	
   $('#feed').html(headerHTML + loadingHTML);
 	
@@ -40,10 +40,6 @@ $(document).ready(function () {
 
 	$.getJSON('/feed/facebook', function(feeds) {
 		fetchFeed('facebook', feeds);
-
-
-
-
 	}).error(function(jqXHR, textStatus, errorThrown) {
 		var error = "";
 		if (jqXHR.status === 0) {
@@ -195,7 +191,7 @@ $(document).ready(function () {
 			
 			console.log(f);
 					
-			feedHTML += '<div class="stream-item">';
+			feedHTML += '<div class="stream-item" stamp="'+as_integer(kitem.created_at)+'">';
 			feedHTML += '  <div class="stream-item-header">';
 			feedHTML += '    '+kitem.headerHtml();
 			feedHTML += '    '+kitem.timeHtml();
@@ -212,6 +208,11 @@ $(document).ready(function () {
 	
 		feedHTML += $('#feed').html();
 		$('#feed').html(feedHTML);
+
+    $('#feed').sortChildren(function(a, b) {
+			return $(a).attr('stamp') < $(b).attr('stamp') ? 1 : -1;
+		});
+
 	}
 	
 	//Function modified from Stack Overflow
@@ -232,22 +233,36 @@ $(document).ready(function () {
 		return data;
 	}
 	
-	
-	function relative_time(created_at) {
-		var values = created_at.split(' ');
+	$.fn.sortChildren = function(compare) {
+  var $children = this.children();
+  $children.sort(compare);
+  this.append($children);
+  return this;
+};
+
+  function as_integer(created_at) {
+	  var values = created_at.split(' ');
 		var dvalues = values[0].split('-');
 		var tvalues = values[1].split(':');
 
-		var parsed_date = Date.parse(dvalues[0], dvalues[1], dvalues[2], tvalues[0], tvalues[1], tvalues[2]);
+		var d = new Date(dvalues[0], dvalues[1]-1, dvalues[2], tvalues[0], tvalues[1], tvalues[2], "0");
+
+		return d.getTime();
+	}
+
+	function relative_time(created_at) {
+    var values = created_at.split(' ');
+		var dvalues = values[0].split('-');
+		var parsed_date = as_integer(created_at);
 
 		var relative_to = new Date();
-		var delta = parseInt((relative_to.getTime() - parsed_date) / 1000);
+    var delta = parseInt((relative_to.getTime() - parsed_date) / 1000);
 		var m_names = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
 		var shortdate = dvalues[2]+' '+m_names[dvalues[1]-1];
-		delta = delta - (relative_to.getTimezoneOffset() * 60);
+		delta = delta + (relative_to.getTimezoneOffset() * 60);
 		
 		if (delta < 60) {
-			return '1m';
+			return delta.toString() + 's';
 		} else if(delta < 120) {
 			return '1m';
 		} else if(delta < (60*60)) {
