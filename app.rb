@@ -16,7 +16,7 @@ require './twitter_bot'
 require './tumblr_bot'
 
 class App < Sinatra::Base
-  enable :sessions
+	use Rack::Session::Cookie, :key => 'rack.session', :secret => 'this-is-the-patently-secret-thing'
   enable :methodoverride
 
   configure :development, :test do
@@ -95,12 +95,8 @@ class App < Sinatra::Base
           puts "**** Facebook had a problem --> #{e}"
         end
       end
-
-      @items = make_items
       
-      @refresh = "on"
-      
-      puts "**** All done, start rendering #{@items.size} items."
+      @path = '/'
       haml :home
     end
   end
@@ -109,11 +105,7 @@ class App < Sinatra::Base
     if session[:auth_token].nil?
       haml :register
     else    
-      @items = make_items
-      
-      @refresh = "on"
-      
-      puts "**** All done, start rendering #{@items.size} items."
+			@path = '/'
       haml :home
     end
   end
@@ -286,6 +278,7 @@ class App < Sinatra::Base
       puts "**** for #{twit_bot.items.size} items"
       
       items = twit_bot.items
+
     end # if :provider == "twitter" and session[:twitter]
 
     if params[:provider] == "facebook" and session[:facebook]
@@ -328,21 +321,5 @@ class App < Sinatra::Base
   end
 
   protected
-  
-  def make_items
-    items = []
-    
-
-
-
-    
-    items.sort_by!{ |i| i.created_at }
-    items.reverse!
-    items.each do |i|
-      i.store(session[:auth_token])
-    end
-    
-    return items
-  end
   
 end

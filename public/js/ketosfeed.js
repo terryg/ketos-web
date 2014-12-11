@@ -12,7 +12,6 @@ $(document).ready(function () {
 	
 	var headerHTML = '';
 	var loadingHTML = '';
-	loadingHTML = ''; // '<div id="loading-container"><img src="images/ajax-loader.gif" width="32" height="32" alt="tweet loader" /></div>';
 	
   $('#feed').html(headerHTML + loadingHTML);
 	
@@ -84,12 +83,14 @@ $(document).ready(function () {
 
   function KetosItem(provider, f) {
 		this.source = provider;
-		this.id = f.id;
+  	this.id = f.id;
 		this.created_at = f.created_at;
 		this.name = f.name;
 		this.display_name = f.display_name;
 		this.profile_image_url = f.profile_image_url;
 		this.text = f.text;
+    this.type = f.type;
+		this.link = f.link;
 		this.img_url = f.img_url;
 		this.post_url = f.post_url;
 		this.headerHtml = headerHtml;
@@ -97,6 +98,7 @@ $(document).ready(function () {
 		this.timeHtml = timeHtml;
 		this.textHtml = textHtml;
 		this.imgHtml = imgHtml;
+    this.linkHtml = linkHtml;
 		this.permaUrl = permaUrl;
 		return this;
   }
@@ -151,7 +153,7 @@ $(document).ready(function () {
 	}
 
 	function timeHtml() {
-		return '<small class="time"><a href="'+this.permaUrl()+'"><span>'+relative_time(this.created_at)+'</span></a></small>';
+		return '<small class="time"><a target="_blank" href="'+this.permaUrl()+'"><span>'+relative_time(this.created_at)+'</span></a></small>';
 	}
 
 	function textHtml() {
@@ -167,6 +169,10 @@ $(document).ready(function () {
   function imgHtml() {
 		return '<img src="'+this.img_url+'" />';
 	}
+
+  function linkHtml() {
+		return '<iframe src="'+this.link+'" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'
+  }
 
 	function permaUrl() {
 		var output = '';
@@ -186,9 +192,12 @@ $(document).ready(function () {
 	function fetchFeed(provider, feeds) {   
 		var feedHTML = '';
 		for (var i=0; i<feeds.length; i++) {
+      console.log(feeds[i]);
 			var f = $.parseJSON(feeds[i]);
+      console.log(f.id);
 			var kitem = KetosItem(provider, f);
-			
+			console.log(kitem.id);
+
 			console.log(f);
 					
 			feedHTML += '<div class="stream-item" stamp="'+as_integer(kitem.created_at)+'">';
@@ -199,6 +208,9 @@ $(document).ready(function () {
 			feedHTML += '  <p class="stream-text">'+kitem.textHtml();
 			if (kitem.img_url) {
 				feedHTML += '<div class="media-container">'+kitem.imgHtml()+'</div>';
+			}
+			if (kitem.type == 'video') {
+				feedHTML += '<div class="media-container">'+kitem.linkHtml()+'</div>';
 			}
 			feedHTML += '  </p>';
 			feedHTML += '  <div class="stream-item-footer"></div>';

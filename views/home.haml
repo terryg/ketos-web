@@ -19,22 +19,6 @@
 
         %div{:class=>"row"}
           %div{:class=>"col-lg-12"}
-          - if !session['twitter']
-            %a{:href=>"/auth/twitter"}
-              Add Twitter
-       
-          - if !session['facebook']
-            %br
-            %a{:href=>"/auth/facebook"}
-              Add Facebook
-
-          - if !session['tumblr']
-            %br
-            %a{:href=>"/auth/tumblr"}
-              Add Tumblr
-
-        %div{:class=>"row"}
-          %div{:class=>"col-lg-12"}
             %form{:action => "", :method => "post"}
               %fieldset
                 %label{:for => "body"} Update:
@@ -45,24 +29,5 @@
         %div{:class=>"row"}
           %div{:class=>"col-lg-12"}
             %div{:id=>"feed"}
-
-        %div{:class=>"row"}
-          %div{:class=>"col-lg-12"}
-
-            %ol{:class => "stream-items"}
-              - @items.each do |i|
-                %li
-                  %div{:class => "stream-item"}
-                    %div{:class => "stream-item-header"}
-                      = i.header_html
-                      = i.time_html
-                    %p{:class => "stream-text"}
-                      = i.text_html
-                    - if i.img_url
-                      %div{:class => "media-container"}
-                        = i.img_html
-                    %div{:class => "stream-item-footer"}
-
-
 
   = haml :footer

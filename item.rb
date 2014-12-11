@@ -13,6 +13,8 @@ class Item
   attr_accessor :img_url
   attr_accessor :post_url
   attr_accessor :title
+	attr_accessor :type
+	attr_accessor :link
   attr_accessor :profile_image_url
 
   def to_json(*a)
@@ -27,6 +29,8 @@ class Item
       'img_url'       => self.img_url,
       'post_url'      => self.post_url,
       'title'         => self.title,
+			'type'          => self.type,
+			'link'          => self.link,
       'profile_image_url' => self.profile_image_url
     }.to_json(*a)
   end
@@ -35,7 +39,7 @@ class Item
     self.need_save = need_save
     if a.is_a?(Twitter::Tweet) 
       self.source = "twitter"
-      self.id = a.id
+			self.id = "#{a.id}"
       self.created_at = a.created_at
       self.name = a.user.screen_name
       self.display_name = a.user.name
@@ -61,6 +65,15 @@ class Item
         self.img_url = a['url']
         self.post_url = a['post_url']
       else
+				# :NOTE: 20141014 tgl: Example of a shared video on facebook.
+				#  {"id"=>"1547321120_10204708651426646", "from"=>{"id"=>"1547321120", "name"=>"Eric Kamila"}, "message"=>"Sit back and relax for this.", "picture"=
+				#  >"https://fbexternal-a.akamaihd.net/safe_image.php?d=AQA7MvANluo0Kz1p&w=130&h=130&url=http%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F469651458_1280x720.jpg", 
+#"link"=>"http://vimeo.com/90429499", "source"=>"http://vimeo.com/moogaloop.swf?clip_id=90429499&autoplay=1", "name"=>"Water", "description"=>"a brief odysse
+#y into the world that i cherish most. music: \"Shopping Malls\" by SJD https://www.facebook.com/pages/SJD/12793501823 filmed on a Red Epic,…", "icon"=>"http
+#s://fbstatic-a.akamaihd.net/rsrc.php/v2/yj/r/v2OnaTyTQZE.gif", "actions"=>[{"name"=>"Comment", "link"=>"https://www.facebook.com/1547321120/posts/1020470865
+#1426646"}, {"name"=>"Like", "link"=>"https://www.facebook.com/1547321120/posts/10204708651426646"}], "privacy"=>{"value"=>""}, "type"=>"video", "status_type
+#"=>"shared_story", "created_time"=>"2014-10-15T03:35:34+0000", "updated_time"=>"2014-10-15T03:35:34+0000"}    
+
         self.source = "facebook"
         self.id = a['id']
         self.created_at = Time.parse(a['created_time'])
@@ -73,141 +86,14 @@ class Item
           self.text = ""
         end
         self.img_url = a['picture']
+				self.type = a['type']
+				if a['link'] and a['link'].match('/vimeo/')
+          self.img_url = nil
+					id = /[0-9]*$/.match(a['link'])
+					self.link = "//player.vimeo.com/video/#{id}"
+				end
       end
     end
-  end
-
-  def source_img
-    if source == "twitter"
-      
-    end
-  end
-
-  def header_html
-    if source == "twitter"
-      "<a href=\"#{name_url}\">
-         <strong class=\"displayname\">#{display_name}</strong>
-         <span>&rlm;</span>
-         <span class=\"username\">
-           <s>@</s><b>#{name}</b>
-         </span>
-       </a>"
-    elsif source == "tumblr"
-      s = "Source: <em>#{title}</em>" unless title.nil?
-      "<a href=\"#{name_url}\">
-         <strong class=\"displayname\">#{name}</strong>
-         <span>&rlm;</span>
-         <span class=\"title\">
-           #{s}
-         </span>
-       </a>"
-    else
-      "<a href=\"#{name_url}\">
-         <strong class=\"displayname\">#{name}</strong>
-         <span>&rlm;</span>
-         <span class=\"username\">
-           &nbsp;
-         </span>
-       </a>"
-    end
-  end
-
-  def name_url
-    if source == "twitter"
-      "https://twitter.com/#{name}"
-    elsif source == "facebook"
-      ids = self.id.split("_")
-      "https://www.facebook.com/#{ids[0]}"
-    elsif source == "tumblr"
-      "http://#{name}.tumblr.com"
-    else
-      "#{name}"
-    end
-  end
-
-  def name_html
-    if source == "twitter"
-      "<a href=\"https://twitter.com/#{name}\">@#{name}</a>"
-    elsif source == "facebook"
-      ids = self.id.split("_")
-      "<a href=\"https://www.facebook.com/#{ids[0]}\">#{name}</a>"
-    else
-      "#{name}"
-    end
-  end
-
-  def time_since
-    diff_seconds = (Time.now - created_at).round
-    diff_minutes = (diff_seconds / 60).round
-    diff_hours = (diff_minutes / 60).round
-    diff_days = (diff_hours / 24).round
-    diff_years = (diff_days / 365).round
-
-    if diff_seconds < 60
-      "#{diff_seconds.to_s.strip}s"
-    elsif diff_minutes < 60
-      "#{diff_minutes.to_s.strip}m"
-    elsif diff_hours < 24
-      "#{diff_hours.to_s.strip}h"
-    elsif diff_days < 365
-      "#{diff_days.to_s.strip}d"
-    else
-      "#{diff_years.to_s.strip}y"
-    end
-  end
-
-  def time_html
-    "<small class=\"time\"><a href=\"#{perma_url}\"><span>#{time_since}</span></a></small>"
-  end
-
-  def text_html
-    s = text
-
-    #replace @usernames with links to that user
-    user = /@(\w+)/
-    while s =~ user
-        s.sub! "@#{$1}", "<a href='https://www.twitter.com/#{$1}' >#{$1}</a>"
-    end
-
-    #replace urls with links
-    url = /( |^)http:\/\/([^\s]*\.[^\s]*)( |$)/
-    while s =~ url
-      name = $2.gsub("\)", "").gsub("\(", "")
-      s.sub! /( |^)http:\/\/#{name}( |$)/, " <a href='http://#{name}' >#{name}</a> "
-    end
-    
-    s    
-  end
-  
-  def img_html
-    "<img src=\"#{self.img_url}\" />"
-  end
-
-  def perma_url
-    if source == "twitter"
-      "http://twitter.com/#{self.name}/status/#{self.id}"
-    elsif source == "tumblr"
-      "#{self.post_url}"
-    elsif source == "facebook"
-      ids = self.id.split("_")
-      "https://www.facebook.com/#{ids[0]}/posts/#{ids[1]}"
-    else
-      "#{name}"
-    end
-  end
-
-  def permalink
-    if source == "twitter"
-      "<a href=\"http://twitter.com/#{self.name}/status/#{self.id}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
-    elsif source == "tumblr"
-      "<a href=\"#{self.post_url}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
-    elsif source == "facebook"
-      ids = self.id.split("_")
-      "<a href=\"https://www.facebook.com/#{ids[0]}/posts/#{ids[1]}\" target=\"_blank\"><img src=\"offsite.png\"/></a>"
-    else
-      "#{name}"
-    end
-
   end
 
   def store(auth_token)
