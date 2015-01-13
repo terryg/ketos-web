@@ -10,11 +10,6 @@ $(document).ready(function () {
 	var showtweetactions = true;
 	var showretweetindicator = true;
 	
-	var headerHTML = '';
-	var loadingHTML = '';
-	
-  $('#feed').html(headerHTML + loadingHTML);
-	
 	$.getJSON('/feed/tumblr', function(feeds) {
 		fetchFeed('tumblr', feeds);
 	}).error(function(jqXHR, textStatus, errorThrown) {
@@ -81,6 +76,33 @@ $(document).ready(function () {
 		alert("error: " + error);
 	});
 
+	$.getJSON('/feed/instagram', function(feeds) {
+		fetchFeed('instagram', feeds);
+	}).error(function(jqXHR, textStatus, errorThrown) {
+		var error = "";
+		if (jqXHR.status === 0) {
+			error = 'Connection problem. Check file path and www vs non-www in getJSON request';
+		} else if (jqXHR.status == 404) {
+			error = 'Requested page not found. [404]';
+		} else if (jqXHR.status == 500) {
+			error = 'Internal Server Error [500].';
+		} else if (exception === 'parsererror') {
+			error = 'Requested JSON parse failed.';
+		} else if (exception === 'timeout') {
+			error = 'Time out error.';
+		} else if (exception === 'abort') {
+			error = 'Ajax request aborted.';
+		} else {
+			error = 'Uncaught Error.\n' + jqXHR.responseText;
+		}	
+		alert("error: " + error);
+	});
+
+  var t = $('#feed').html();
+  if (t == "") {
+	//  $('#feed').html('Have you configured your <a href="/account">account</a>?');
+	}
+
   function KetosItem(provider, f) {
 		this.source = provider;
   	this.id = f.id;
@@ -106,6 +128,7 @@ $(document).ready(function () {
   function headerHtml() {
 		var output = '';
 		if (this.source == 'twitter') {
+      output += '<strong>tw</strong>'
 			output += '<a href="'+this.nameUrl()+'">'
 			output += '  <strong class="displayname">'+this.display_name+'</strong>';
 			output += '  <span>&rlm;</span>';
@@ -118,6 +141,7 @@ $(document).ready(function () {
 			if (this.title) {
 				s = 'Source: <em>'+this.title+'</em>'
 			}
+      output += '<strong>tu</strong>'
 			output += '<a href="'+this.nameUrl()+'">';
 			output += '  <strong class="displayname">'+this.name+'</strong>';
 			output += '  <span>&rlm;</span>';
@@ -125,6 +149,12 @@ $(document).ready(function () {
 			output += '</a>';
     
 		} else {
+      if (this.source == "facebook") {
+        output += '<strong>fb</strong>'					
+			} else {
+        output += '<strong>i</strong>'					
+			}
+
 			output += '<a href="'+this.nameUrl()+'">'
 			output += '  <strong class="displayname">'+this.name+'</strong>';
 			output += '  <span>&rlm;</span>';
@@ -146,6 +176,8 @@ $(document).ready(function () {
 			output += 'https://www.facebook.com/'+ids[0];
 		} else if (this.source == 'tumblr') {
 			output += 'http://'+this.name+'.tumblr.com';
+		} else if (this.source == 'instagram') {
+			output += 'http://instagram.com/'+this.name;
 		} else {
 			output += this.name;
 		}
@@ -183,7 +215,9 @@ $(document).ready(function () {
 			output += 'https://www.facebook.com/'+ids[0]+'/posts/'+ids[1];
 		} else if (this.source == 'tumblr') {
 			output += this.post_url;
-		} else {	
+		} else if (this.source == 'instagram') {
+			output += this.post_url;
+		} else {
 			output += this.name;
 		}
 		return output;
@@ -218,9 +252,10 @@ $(document).ready(function () {
 			
 		}
 	
-		feedHTML += $('#feed').html();
-		$('#feed').html(feedHTML);
 
+    feedHTML += $('#feed').html();
+	  $('#feed').html(feedHTML);
+	
     $('#feed').sortChildren(function(a, b) {
 			return $(a).attr('stamp') < $(b).attr('stamp') ? 1 : -1;
 		});

@@ -58,6 +58,10 @@ body {
   margin: 0 auto;
 }
 
+.form-update {
+  margin: 20px;
+}
+
 .form-register {
   max-width: 330px;
   padding: 15px;

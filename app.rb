@@ -4,6 +4,7 @@ require 'haml'
 require 'omniauth'
 require 'omniauth-twitter'
 require 'omniauth-tumblr'
+require 'omniauth-instagram'
 require 'omniauth-facebook'
 require 'rest-client'
 require 'json'
@@ -14,6 +15,8 @@ require 'koala'
 require './item'
 require './twitter_bot'
 require './tumblr_bot'
+require './facebook_bot'
+require './instagram_bot'
 
 class App < Sinatra::Base
 	use Rack::Session::Cookie, :key => 'rack.session', :secret => 'this-is-the-patently-secret-thing'
@@ -41,6 +44,7 @@ class App < Sinatra::Base
     provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'read_stream,publish_stream', :display => 'popup'
     provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
+		provider :instagram, ENV['INSTAGRAM_CONSUMER_KEY'], ENV['INSTAGRAM_CONSUMER_SECRET']
   end
 
   before do
@@ -53,7 +57,7 @@ class App < Sinatra::Base
     end
   end
 
-  PROVIDERS = ['twitter', 'tumblr', 'facebook']
+  PROVIDERS = ['twitter', 'tumblr', 'facebook', 'instagram']
 
   post '/' do
     if session[:auth_token].nil?
@@ -72,6 +76,17 @@ class App < Sinatra::Base
           puts "**** Twitter had a problem --> #{e}"
         end
       end
+
+			if session[:instagram]
+        begin
+          puts "**** Instagram in session, posting..."
+          insta_bot = InstagramBot.new(session[:instagram][:token_secret])
+          insta_bot.post(body)
+          puts "**** Done."
+        rescue => e
+          puts "**** Instagram had a problem --> #{e}"
+        end
+		  end
 
       if session[:tumblr]
         begin
@@ -213,6 +228,7 @@ class App < Sinatra::Base
     auth_hash = request.env['omniauth.auth']
 
     puts "**** /auth/#{params[:provider]}/callback"
+    puts "**** #{auth_hash} ****"
 
     provider = params[:provider]
     session[provider] = {}
@@ -266,6 +282,19 @@ class App < Sinatra::Base
   get "/feed/:provider" do
     items = []
 
+    if params[:provider] == "instagram" and session[:instagram]
+			insta_bot = InstagramBot.new(session[:instagram][:token])
+      
+      last_id = session[:instagram][:last_id] || 0
+			session[:instagram][:last_id] = insta_bot.get_grams(last_id, session[:auth_token])
+
+      puts "**** feed of instagram"
+      puts "**** for #{insta_bot.items.size} items"
+      
+      items = insta_bot.items
+
+    end # if :provider == "instagram" and session[:instagram]
+
     if params[:provider] == "twitter" and session[:twitter]
       twit_bot = TwitterBot.new(session[:twitter][:token],
                                 session[:twitter][:token_secret])
@@ -282,27 +311,13 @@ class App < Sinatra::Base
     end # if :provider == "twitter" and session[:twitter]
 
     if params[:provider] == "facebook" and session[:facebook]
-      graph = Koala::Facebook::API.new(session[:facebook][:token])
-      puts "**** Accessing FB feed..."
-      begin
-        feed = graph.get_connections("me", "home") 
-        
-        session[:facebook][:last_created_time] ||= 0
-        ids_to_save = []
-        feed.each do |f|  
-          # :BUG: 20130905 tgl: not ready for saving, set 2nd arg ==
-          # false for now
-          items << Item.new(f, false)
-        end
-        
-      rescue Koala::Facebook::APIError => e
-        puts "**** there was a problem"
-        puts "**** #{e.response_body}"
-        puts "**** #{e.message}"
-        feed = []
-        session[:facebook] = nil
-      end
-      puts "**** Done."
+			fb_bot = FacebookBot.new(session[:facebook][:token])
+			fb_bot.get_news()
+
+			puts "**** feed of facebook"
+			puts "**** for #{fb_bot.items.size} items"
+
+			items.concat(fb_bot.items)
     end # if session['facebook']
 
 		if params[:provider] == "tumblr" && session[:tumblr]
@@ -313,8 +328,15 @@ class App < Sinatra::Base
       session[:tumblr][:last_id] = tumblr_bot.get_posts(last_id,
                                                         session[:auth_token])
       
+			puts "**** feed of tumblr"
+			puts "**** for #{tumblr_bot.items.size} items"
+
       items.concat(tumblr_bot.items)    
     end # if session[:tumblr]
+
+		if params[:provider] == "instagram" && session[:instagram]
+
+		end # if session[:instagram]
 
     content_type :json
     items.map{ |o| o.to_json }.to_json

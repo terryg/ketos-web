@@ -1,5 +1,6 @@
 require 'twitter'
 require 'json'
+require 'hashie'
 
 class Item
 
@@ -37,7 +38,15 @@ class Item
   
   def initialize(a, need_save)
     self.need_save = need_save
-    if a.is_a?(Twitter::Tweet) 
+		if a.is_a?(Hashie::Mash)
+			self.source = "instagram"
+			self.id = a.id
+			self.created_at = Time.at(a.caption.created_time.to_i)
+			self.name = a.user.username
+			self.text = a.caption.text
+			self.img_url = a.images.low_resolution.url
+			self.post_url = a.link
+		elsif a.is_a?(Twitter::Tweet) 
       self.source = "twitter"
 			self.id = "#{a.id}"
       self.created_at = a.created_at

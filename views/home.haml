@@ -19,12 +19,19 @@
 
         %div{:class=>"row"}
           %div{:class=>"col-lg-12"}
-            %form{:action => "", :method => "post"}
-              %fieldset
-                %label{:for => "body"} Update:
-                %textarea{:name => "body", :rows => "2", :cols => "70"}
-
-                %input{:type => "submit", :value => "Send", :class => "button"}
+            %div{:class=>"form-update"}
+              %form{:action => "", :method => "post"}
+                %fieldset
+                  %label 
+                    Text
+                    %input{:type => "radio", :name => "type", :value => "text", :checked => true}								
+                  %label
+                    Photo
+                    %input{:type => "radio", :name => "type", :value => "photo"}
+                  %br
+                  %textarea{:name => "body", :rows => "2", :cols => "70"}
+                  %br &nbsp;
+                  %input{:type => "submit", :value => "Send", :class => "button"}
 
         %div{:class=>"row"}
           %div{:class=>"col-lg-12"}
