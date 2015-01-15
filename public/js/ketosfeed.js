@@ -128,7 +128,6 @@ $(document).ready(function () {
   function headerHtml() {
 		var output = '';
 		if (this.source == 'twitter') {
-      output += '<strong>tw</strong>'
 			output += '<a href="'+this.nameUrl()+'">'
 			output += '  <strong class="displayname">'+this.display_name+'</strong>';
 			output += '  <span>&rlm;</span>';
@@ -141,20 +140,12 @@ $(document).ready(function () {
 			if (this.title) {
 				s = 'Source: <em>'+this.title+'</em>'
 			}
-      output += '<strong>tu</strong>'
 			output += '<a href="'+this.nameUrl()+'">';
 			output += '  <strong class="displayname">'+this.name+'</strong>';
 			output += '  <span>&rlm;</span>';
 			output += '  <span class="title">'+s+'</span>';
 			output += '</a>';
-    
 		} else {
-      if (this.source == "facebook") {
-        output += '<strong>fb</strong>'					
-			} else {
-        output += '<strong>i</strong>'					
-			}
-
 			output += '<a href="'+this.nameUrl()+'">'
 			output += '  <strong class="displayname">'+this.name+'</strong>';
 			output += '  <span>&rlm;</span>';
@@ -234,7 +225,7 @@ $(document).ready(function () {
 
 			console.log(f);
 					
-			feedHTML += '<div class="stream-item" stamp="'+as_integer(kitem.created_at)+'">';
+			feedHTML += '<div class="stream-item '+ kitem.source +'" stamp="'+as_integer(kitem.created_at)+'">';
 			feedHTML += '  <div class="stream-item-header">';
 			feedHTML += '    '+kitem.headerHtml();
 			feedHTML += '    '+kitem.timeHtml();
@@ -248,6 +239,7 @@ $(document).ready(function () {
 			}
 			feedHTML += '  </p>';
 			feedHTML += '  <div class="stream-item-footer"></div>';
+			feedHTML += '  <hr/>';
 			feedHTML += '</div>';
 			
 		}

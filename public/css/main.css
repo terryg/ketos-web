@@ -42,6 +42,22 @@ body {
 -------------------------------------------------- */
 /* Not required for template or sticky footer method. */
 
+.facebook {
+	background-color: #3b5998;
+}
+
+.instagram {
+	background-color: #517fa4;
+}
+
+.tumblr {
+	background-color: #b3d4fc;
+}
+
+.twitter {
+	background-color: #55aaee;gitm
+}
+
 .container {
   width: auto;
   max-width: 680px;
