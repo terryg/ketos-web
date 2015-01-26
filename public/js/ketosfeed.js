@@ -225,8 +225,8 @@ $(document).ready(function () {
 
 			console.log(f);
 					
-			feedHTML += '<div class="stream-item '+ kitem.source +'" stamp="'+as_integer(kitem.created_at)+'">';
-			feedHTML += '  <div class="stream-item-header">';
+			feedHTML += '<div class="stream-item" stamp="'+as_integer(kitem.created_at)+'">';
+			feedHTML += '  <div class="stream-item-header '+kitem.source+'">';
 			feedHTML += '    '+kitem.headerHtml();
 			feedHTML += '    '+kitem.timeHtml();
 			feedHTML += '  </div>';
