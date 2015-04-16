@@ -20,7 +20,7 @@ require './instagram_bot'
 
 class App < Sinatra::Base
 	use Rack::Session::Cookie, :key => 'rack.session', :secret => 'this-is-the-patently-secret-thing'
-  enable :methodoverride
+	enable :methodoverride
 
   configure :development, :test do
     set :host, 'skeely-framed.codio.io:3000'
@@ -55,6 +55,14 @@ class App < Sinatra::Base
     if session[:auth_token].nil? && !['/', '/login', '/register'].include?(request.path_info)
       redirect '/'
     end
+
+    @providers = PROVIDERS
+    @active = []
+    PROVIDERS.each do |p|
+			if session[p]
+        @active << p
+			end
+    end
   end
 
   PROVIDERS = ['twitter', 'tumblr', 'facebook', 'instagram']
@@ -65,7 +73,7 @@ class App < Sinatra::Base
     else
       body = params[:body]
 
-      if session[:twitter]
+			if params[:twitter] == "on" and session[:twitter]
         begin
           puts "**** Twitter in session, posting..."
           twit_bot = TwitterBot.new(session[:twitter][:token],
@@ -77,7 +85,7 @@ class App < Sinatra::Base
         end
       end
 
-			if session[:instagram]
+			if params[:instagram] == "on" and session[:instagram]
         begin
           puts "**** Instagram in session, posting..."
           insta_bot = InstagramBot.new(session[:instagram][:token_secret])
@@ -88,7 +96,7 @@ class App < Sinatra::Base
         end
 		  end
 
-      if session[:tumblr]
+			if params[:tumblr] == "on" and session[:tumblr]
         begin
           puts "**** Tumblr in session, posting..."
           tumblr_bot = TumblrBot.new(session[:tumblr][:token],
@@ -100,7 +108,7 @@ class App < Sinatra::Base
         end
       end
 
-      if session[:facebook]
+			if params[:facebook] == "on" and session[:facebook]
         begin
           puts "**** Facebook in session, posting..."
           graph = Koala::Facebook::API.new(session[:facebook][:token])
@@ -200,11 +208,6 @@ class App < Sinatra::Base
   end
 
   get '/account' do
-    @providers = PROVIDERS
-    @active = []
-    PROVIDERS.each do |p|
-      @active << p
-    end
     haml :account
   end
 

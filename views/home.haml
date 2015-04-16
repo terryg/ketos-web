@@ -30,6 +30,15 @@
                     %input{:type => "radio", :name => "type", :value => "photo"}
                   %br
                   %textarea{:name => "body", :rows => "2", :cols => "70"}
+                  %br
+                    %div
+                      %ul
+                        - @active.each do |p|
+                          %li{:class => "provider"}
+                            %label
+                              = p
+                              %input{:type => "checkbox", :name => "#{p}", :checked => true}
+
                   %br &nbsp;
                   %input{:type => "submit", :value => "Send", :class => "button"}
 
