@@ -282,6 +282,15 @@ class App < Sinatra::Base
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
+  post "/feed/twitter/retweet/:id" do
+    if session[:twitter]
+      twit_bot = TwitterBot.new(session[:twitter][:token],
+                                session[:twitter][:token_secret])
+			twit_bot.retweet(params[:id])
+		end
+    redirect(to("http://#{request.host}:#{request.port}"), 303)
+	end  
+
   get "/feed/:provider" do
     items = []
 

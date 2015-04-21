@@ -116,6 +116,7 @@ $(document).ready(function () {
 		this.img_url = f.img_url;
 		this.post_url = f.post_url;
 		this.headerHtml = headerHtml;
+    this.footerHtml = footerHtml;
 		this.nameUrl = nameUrl;
 		this.timeHtml = timeHtml;
 		this.textHtml = textHtml;
@@ -156,6 +157,14 @@ $(document).ready(function () {
 		}
 
 		return output;
+	}
+
+  function footerHtml() {
+    var output = '';
+    if (this.source == 'twitter') {
+			output += '<form action="/feed/twitter/retweet/'+this.id+'" method="post" ><input type="submit" value="retweet" /></form>';
+		}
+    return output;
 	}
 
 	function nameUrl() {
@@ -238,7 +247,7 @@ $(document).ready(function () {
 				feedHTML += '<div class="media-container">'+kitem.linkHtml()+'</div>';
 			}
 			feedHTML += '  </p>';
-			feedHTML += '  <div class="stream-item-footer"></div>';
+			feedHTML += '  <div class="stream-item-footer">'+kitem.footerHtml()+'</div>';
 			feedHTML += '  <hr/>';
 			feedHTML += '</div>';
 			

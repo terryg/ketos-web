@@ -78,4 +78,21 @@ class TwitterBot
     return last_id
   end
 
+  def retweet(id)
+		puts "**** Start retweet ****"
+		Twitter.configure do |config|
+      config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
+      config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
+      config.oauth_token = @token
+      config.oauth_token_secret = @secret
+    end
+
+    begin
+			puts "**** Calling retweet for #{id} ****"
+		  Twitter.retweet(id)
+    rescue => e
+      puts "**** There was an error with Twitter -> #{e} ****"
+      tweets = []
+    end
+  end
 end
