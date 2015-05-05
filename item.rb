@@ -41,9 +41,9 @@ class Item
 		if a.is_a?(Hashie::Mash)
 			self.source = "instagram"
 			self.id = a.id
-			self.created_at = Time.at(a.caption.created_time.to_i)
+			self.created_at = Time.at(a.created_time.to_i)
 			self.name = a.user.username
-			self.text = a.caption.text
+			self.text = a.caption.text unless a.caption.nil?
 			self.img_url = a.images.low_resolution.url
 			self.post_url = a.link
 		elsif a.is_a?(Twitter::Tweet) 

@@ -191,7 +191,7 @@ $(document).ready(function () {
 	function textHtml() {
 		s = this.text;
 
-		if (this.source != 'tumblr') {
+		if (this.source != 'tumblr' && this.source != 'instagram') {
 			s = addlinks(s);
 		}
 

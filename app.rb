@@ -6,6 +6,8 @@ require 'omniauth-twitter'
 require 'omniauth-tumblr'
 require 'omniauth-instagram'
 require 'omniauth-facebook'
+require 'omniauth-google-oauth2'
+require 'omniauth-linkedin'
 require 'rest-client'
 require 'json'
 require 'twitter'
@@ -44,6 +46,8 @@ class App < Sinatra::Base
     provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'read_stream,publish_stream', :display => 'popup'
     provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
+		provider :google_oauth2, ENV['GOOGLEPLUS_CONSUMER_KEY'], ENV['GOOGLEPLUS_CONSUMER_SECRET']
+		provider :linkedin, ENV['LINKEDIN_CONSUMER_KEY'], ENV['LINKEDIN_CONSUMER_SECRET']
 		provider :instagram, ENV['INSTAGRAM_CONSUMER_KEY'], ENV['INSTAGRAM_CONSUMER_SECRET']
   end
 
@@ -65,7 +69,7 @@ class App < Sinatra::Base
     end
   end
 
-  PROVIDERS = ['twitter', 'tumblr', 'facebook', 'instagram']
+	PROVIDERS = ['twitter', 'tumblr', 'facebook', 'googleplus', 'instagram', 'linkedin', 'pinterest']
 
   post '/' do
     if session[:auth_token].nil?
@@ -345,10 +349,6 @@ class App < Sinatra::Base
 
       items.concat(tumblr_bot.items)    
     end # if session[:tumblr]
-
-		if params[:provider] == "instagram" && session[:instagram]
-
-		end # if session[:instagram]
 
     content_type :json
     items.map{ |o| o.to_json }.to_json

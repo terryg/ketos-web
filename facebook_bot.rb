@@ -40,4 +40,7 @@ class FacebookBot
 
   end
 
+  def like
+  end
+
 end
