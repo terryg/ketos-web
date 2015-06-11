@@ -14,14 +14,15 @@ require 'twitter'
 require 'tumblr_client'
 require 'koala'
 
-require './item'
-require './twitter_bot'
-require './tumblr_bot'
-require './facebook_bot'
-require './instagram_bot'
+require './models/item'
+require './models/twitter_bot'
+require './models/tumblr_bot'
+require './models/facebook_bot'
+require './models/instagram_bot'
+require './models/google_plus_bot'
 
 class App < Sinatra::Base
-	use Rack::Session::Cookie, :key => 'rack.session', :secret => 'this-is-the-patently-secret-thing'
+	use Rack::Session::Cookie, :key => 'rack.session', :secret => ENV['RACK_SESSION_SECRET']
 	enable :methodoverride
 
   configure :development, :test do
@@ -43,10 +44,10 @@ class App < Sinatra::Base
   end
 
   use OmniAuth::Builder do
-    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'read_stream,publish_stream', :display => 'popup'
+    provider :facebook, ENV['FACEBOOK_CONSUMER_KEY'], ENV['FACEBOOK_CONSUMER_SECRET'], :scope => 'user_posts,read_stream,publish_actions', :display => 'popup'
     provider :tumblr, ENV['TUMBLR_CONSUMER_KEY'], ENV['TUMBLR_CONSUMER_SECRET']
     provider :twitter, ENV['TWITTER_CONSUMER_KEY'], ENV['TWITTER_CONSUMER_SECRET']
-		provider :google_oauth2, ENV['GOOGLEPLUS_CONSUMER_KEY'], ENV['GOOGLEPLUS_CONSUMER_SECRET']
+		provider :google_oauth2, ENV['GOOGLEPLUS_CONSUMER_KEY'], ENV['GOOGLEPLUS_CONSUMER_SECRET'], :scope => 'plus.login,plus.me'
 		provider :linkedin, ENV['LINKEDIN_CONSUMER_KEY'], ENV['LINKEDIN_CONSUMER_SECRET']
 		provider :instagram, ENV['INSTAGRAM_CONSUMER_KEY'], ENV['INSTAGRAM_CONSUMER_SECRET']
   end
@@ -62,20 +63,31 @@ class App < Sinatra::Base
 
     @providers = PROVIDERS
     @active = []
-    PROVIDERS.each do |p|
+		PROVIDERS.each do |p|
 			if session[p]
         @active << p
 			end
     end
   end
 
-	PROVIDERS = ['twitter', 'tumblr', 'facebook', 'googleplus', 'instagram', 'linkedin', 'pinterest']
+	PROVIDERS = ['twitter', 'tumblr', 'facebook', 'google_oauth2', 'instagram', 'linkedin', 'pinterest']
 
   post '/' do
     if session[:auth_token].nil?
       haml :register
     else
       body = params[:body]
+
+			if params[:google_oauth2] == "on" and session[:google_oauth2]
+        begin
+					puts "**** Google Plus in session, posting..."
+					gplus_bot = GooglePlusBot.new(session[:google_oauth2][:token])
+          gplus_bot.post(body)
+          puts "**** Done."
+        rescue => e
+					puts "**** Google Plus had a problem --> #{e}"
+        end
+      end
 
 			if params[:twitter] == "on" and session[:twitter]
         begin
@@ -115,8 +127,8 @@ class App < Sinatra::Base
 			if params[:facebook] == "on" and session[:facebook]
         begin
           puts "**** Facebook in session, posting..."
-          graph = Koala::Facebook::API.new(session[:facebook][:token])
-          graph.put_connections("me", "feed", :message => body)
+					fbook_bot = FacebookBot.new(session[:facebook][:token])
+          fbook_bot.post(body)
           puts "**** Done."
         rescue => e
           puts "**** Facebook had a problem --> #{e}"
@@ -297,6 +309,17 @@ class App < Sinatra::Base
 
   get "/feed/:provider" do
     items = []
+
+    if params[:provider] == "google_oauth2" and session[:google_oauth2]
+			gplus_bot = GooglePlusBot.new(session[:google_oauth2][:token])
+      last_id = session[:google_oauth2][:last_id] || 0
+			session[:google_oauth2][:last_id] = gplus_bot.load_items(last_id)
+
+      puts "**** feed of google_oauth2"
+      puts "**** for #{gplus_bot.items.size} items"
+      items = gplus_bot.items
+
+    end # if :provider == "google_oauth2" and session[:google_oauth2]
 
     if params[:provider] == "instagram" and session[:instagram]
 			insta_bot = InstagramBot.new(session[:instagram][:token])

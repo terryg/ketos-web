@@ -1,6 +1,8 @@
 require 'tumblr_client'
 require 'json'
 
+require './models/item'
+
 class TumblrBot
 
   def initialize(token, secret)

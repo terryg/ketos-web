@@ -1,6 +1,6 @@
 require 'koala'
 
-require './item'
+require './models/item'
 
 class FacebookBot
 
@@ -14,7 +14,15 @@ class FacebookBot
   end
 
   def post(body)
-
+    graph = Koala::Facebook::API.new(@token)
+		begin
+      graph.put_connections("me", "feed", :message => body)
+		rescue Koala::Facebook::APIError => e
+      puts "**** there was a problem"
+      puts "**** #{e.response_body}"
+      puts "**** #{e.message}"
+      feed = []
+    end
   end
 
 	def get_news()

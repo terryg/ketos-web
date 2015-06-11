@@ -1,5 +1,7 @@
 require 'twitter'
 
+require './models/item'
+
 class TwitterBot
 
   def initialize(token, secret)
