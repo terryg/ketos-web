@@ -20,14 +20,9 @@
         %div{:class=>"row"}
           %div{:class=>"col-lg-12"}
             %div{:class=>"form-update"}
-              %form{:action => "", :method => "post"}
+              %form{:action => "", :method => "post", :enctype => "multipart/form-data"}
                 %fieldset
-                  %label 
-                    Text
-                    %input{:type => "radio", :name => "type", :value => "text", :checked => true}								
-                  %label
-                    Photo
-                    %input{:type => "radio", :name => "type", :value => "photo"}
+                  %input{:type => "file", :name => "media", :accept => "image/gif,image/jpeg,image/jpg,image/png", :value => "Add Photo"}
                   %br
                   %textarea{:name => "body", :rows => "2", :cols => "70"}
                   %br

@@ -117,7 +117,8 @@ class App < Sinatra::Base
           puts "**** Tumblr in session, posting..."
           tumblr_bot = TumblrBot.new(session[:tumblr][:token],
                                      session[:tumblr][:token_secret])
-          tumblr_bot.post(session[:tumblr][:uid], body)
+          tempfile = params[:media][:tempfile] 
+					tumblr_bot.post(session[:tumblr][:uid], body, tempfile)
           puts "**** Done."
         rescue => e
           puts "**** Tumblr had a problem --> #{e}"

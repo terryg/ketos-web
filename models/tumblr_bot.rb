@@ -14,7 +14,7 @@ class TumblrBot
     return @items
   end
 
-  def post(blogname, body)
+	def post(blogname, body, tempfile)
     Tumblr.configure do |config|
       config.consumer_key = ENV['TUMBLR_CONSUMER_KEY']
       config.consumer_secret = ENV['TUMBLR_CONSUMER_SECRET']
@@ -24,7 +24,11 @@ class TumblrBot
   
     begin
       client = Tumblr::Client.new
-      client.text("#{blogname}.tumblr.com", {:body => body})
+			if tempfile.nil?
+        client.text("#{blogname}.tumblr.com", {:body => body})
+			else
+				client.photo("#{blogname}.tumblr.com", {:data => [tempfile.path]})
+		  end
     rescue => e
       puts "**** There was an error with Tumblr -> #{e} ****"
     end
