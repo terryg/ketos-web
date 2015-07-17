@@ -1,9 +1,10 @@
 require 'tumblr_client'
 require 'json'
 
+require './models/feed_bot'
 require './models/item'
 
-class TumblrBot
+class TumblrBot < FeedBot
 
   def initialize(token, secret)
     @token = token

@@ -1,6 +1,8 @@
 require 'instagram'
 
-class InstagramBot
+require './models/feed_bot'
+
+class InstagramBot < FeedBot
 
 	def initialize(token)
     @token = token

@@ -1,8 +1,9 @@
 require 'twitter'
 
 require './models/item'
+require './models/feed_bot'
 
-class TwitterBot
+class TwitterBot < FeedBot
 
   def initialize(token, secret)
     @token = token
@@ -30,7 +31,7 @@ class TwitterBot
     end
   end
 
-  def get_tweets(last_id, auth_token)
+	def load_items(last_id, auth_token)
     Twitter.configure do |config|
       config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
       config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']

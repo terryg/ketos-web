@@ -15,6 +15,7 @@ require 'tumblr_client'
 require 'koala'
 
 require './models/item'
+require './models/feed_bot_factory'
 require './models/twitter_bot'
 require './models/tumblr_bot'
 require './models/facebook_bot'
@@ -311,69 +312,19 @@ class App < Sinatra::Base
   get "/feed/:provider" do
     items = []
 
-    if params[:provider] == "google_oauth2" and session[:google_oauth2]
-			gplus_bot = GooglePlusBot.new(session[:google_oauth2][:token])
-      last_id = session[:google_oauth2][:last_id] || 0
-			session[:google_oauth2][:last_id] = gplus_bot.load_items(last_id)
+		puts "**** #{params[:provider]} #{session[params[:provider]]}}"
 
-      puts "**** feed of google_oauth2"
-      puts "**** for #{gplus_bot.items.size} items"
-      items = gplus_bot.items
+		factory = FeedBotFactory.new(params[:provider], session)
+		bot = factory.make(session[params[:provider]])
+   
+		puts "**** feed of #{params[:provider]}"
 
-    end # if :provider == "google_oauth2" and session[:google_oauth2]
+    last_id = session[params[:provider]][:last_id] || 0
+session[params[:provider]][:last_id] = bot.load_items(last_id, session[:auth_token])
 
-    if params[:provider] == "instagram" and session[:instagram]
-			insta_bot = InstagramBot.new(session[:instagram][:token])
-      
-      last_id = session[:instagram][:last_id] || 0
-			session[:instagram][:last_id] = insta_bot.get_grams(last_id, session[:auth_token])
-
-      puts "**** feed of instagram"
-      puts "**** for #{insta_bot.items.size} items"
-      
-      items = insta_bot.items
-
-    end # if :provider == "instagram" and session[:instagram]
-
-    if params[:provider] == "twitter" and session[:twitter]
-      twit_bot = TwitterBot.new(session[:twitter][:token],
-                                session[:twitter][:token_secret])
-      
-      last_id = session[:twitter][:last_id] || 0
-      session[:twitter][:last_id] = twit_bot.get_tweets(last_id,
-                                                        session[:auth_token])
-
-      puts "**** feed of twitter"
-      puts "**** for #{twit_bot.items.size} items"
-      
-      items = twit_bot.items
-
-    end # if :provider == "twitter" and session[:twitter]
-
-    if params[:provider] == "facebook" and session[:facebook]
-			fb_bot = FacebookBot.new(session[:facebook][:token])
-			fb_bot.get_news()
-
-			puts "**** feed of facebook"
-			puts "**** for #{fb_bot.items.size} items"
-
-			items.concat(fb_bot.items)
-    end # if session['facebook']
-
-		if params[:provider] == "tumblr" && session[:tumblr]
-      tumblr_bot = TumblrBot.new(session[:tumblr][:token],
-                                 session[:tumblr][:token_secret])
-      
-      last_id = session[:tumblr][:last_id] || 0
-      session[:tumblr][:last_id] = tumblr_bot.get_posts(last_id,
-                                                        session[:auth_token])
-      
-			puts "**** feed of tumblr"
-			puts "**** for #{tumblr_bot.items.size} items"
-
-      items.concat(tumblr_bot.items)    
-    end # if session[:tumblr]
-
+    puts "**** for #{bot.items.size} items"
+		items = bot.items
+    
     content_type :json
     items.map{ |o| o.to_json }.to_json
   end

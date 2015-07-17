@@ -1,8 +1,8 @@
 require 'koala'
 
-require './models/item'
+require './models/feed_bot'
 
-class FacebookBot
+class FacebookBot < FeedBot
 
   def initialize(token)
     @token = token
@@ -25,7 +25,7 @@ class FacebookBot
     end
   end
 
-	def get_news()
+	def load_items(last_id, auth_token)
 		graph = Koala::Facebook::API.new(@token)
     puts "**** Accessing FB feed..." 
     begin
