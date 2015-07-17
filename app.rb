@@ -312,19 +312,22 @@ class App < Sinatra::Base
   get "/feed/:provider" do
     items = []
 
-		puts "**** #{params[:provider]} #{session[params[:provider]]}}"
+		puts "**** #{params[:provider]} #{session[params[:provider]]}"
 
-		factory = FeedBotFactory.new(params[:provider], session)
-		bot = factory.make(session[params[:provider]])
+    if session[params[:provider]]
+			puts "**** in session"
+  	  factory = FeedBotFactory.new(params[:provider], session)
+	    bot = factory.make(session[params[:provider]])
    
-		puts "**** feed of #{params[:provider]}"
+	    puts "**** feed of #{params[:provider]}"
 
-    last_id = session[params[:provider]][:last_id] || 0
-session[params[:provider]][:last_id] = bot.load_items(last_id, session[:auth_token])
+      last_id = session[params[:provider]][:last_id] || 0
+      session[params[:provider]][:last_id] = bot.load_items(last_id, session[:auth_token])
 
-    puts "**** for #{bot.items.size} items"
-		items = bot.items
-    
+      puts "**** for #{bot.items.size} items"
+		  items = bot.items
+    end
+
     content_type :json
     items.map{ |o| o.to_json }.to_json
   end

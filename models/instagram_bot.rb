@@ -21,7 +21,7 @@ class InstagramBot < FeedBot
 
   end
 
-  def get_grams(last_id, auth_token)
+	def load_items(last_id, auth_token)
     begin
       puts "**** Accessing Instagram feed..."
 			client = Instagram.client(:access_token => @token)

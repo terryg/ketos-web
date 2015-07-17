@@ -36,7 +36,7 @@ class TumblrBot < FeedBot
 
   end
 
-  def get_posts(last_id, auth_token)
+	def load_items(last_id, auth_token)
 
     Tumblr.configure do |config|
       config.consumer_key = ENV['TUMBLR_CONSUMER_KEY']
