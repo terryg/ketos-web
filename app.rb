@@ -79,64 +79,31 @@ class App < Sinatra::Base
     else
       body = params[:body]
 
-			if params[:google_oauth2] == "on" and session[:google_oauth2]
-        begin
-					puts "**** Google Plus in session, posting..."
-					gplus_bot = GooglePlusBot.new(session[:google_oauth2][:token])
-          gplus_bot.post(body)
-          puts "**** Done."
-        rescue => e
-					puts "**** Google Plus had a problem --> #{e}"
-        end
-      end
-
-			if params[:twitter] == "on" and session[:twitter]
-        begin
-          puts "**** Twitter in session, posting..."
-          twit_bot = TwitterBot.new(session[:twitter][:token],
-                                    session[:twitter][:token_secret])
-          twit_bot.post(body)
-          puts "**** Done."
-        rescue => e
-          puts "**** Twitter had a problem --> #{e}"
-        end
-      end
-
-			if params[:instagram] == "on" and session[:instagram]
-        begin
-          puts "**** Instagram in session, posting..."
-          insta_bot = InstagramBot.new(session[:instagram][:token_secret])
-          insta_bot.post(body)
-          puts "**** Done."
-        rescue => e
-          puts "**** Instagram had a problem --> #{e}"
-        end
-		  end
-
-			if params[:tumblr] == "on" and session[:tumblr]
-        begin
-          puts "**** Tumblr in session, posting..."
-          tumblr_bot = TumblrBot.new(session[:tumblr][:token],
-                                     session[:tumblr][:token_secret])
-          tempfile = params[:media][:tempfile] 
-					tumblr_bot.post(session[:tumblr][:uid], body, tempfile)
-          puts "**** Done."
-        rescue => e
-          puts "**** Tumblr had a problem --> #{e}"
-        end
-      end
-
-			if params[:facebook] == "on" and session[:facebook]
-        begin
-          puts "**** Facebook in session, posting..."
-					fbook_bot = FacebookBot.new(session[:facebook][:token])
-          fbook_bot.post(body)
-          puts "**** Done."
-        rescue => e
-          puts "**** Facebook had a problem --> #{e}"
-        end
-      end
+      puts "**** POST '/'"
+      puts params
       
+			@active.each do |active|
+				puts "**** #{active}: #{params[active]}"
+			  puts "**** session has [#{session[active]}]"
+
+		    if session[active] and params[active] == "on"
+					puts "**** in session and on"
+  	   
+					factory = FeedBotFactory.new(active, session)
+					bot = factory.make(session[active])
+   
+	        puts "**** Posting..."
+
+					if params[:media] and params[:media][:tempfile]
+		  			bot.post_file(params[:media][:tempfile])
+			  	else       
+				    bot.post(body)
+				  end
+
+  				puts "**** Done."
+        end
+    	end
+  
       @path = '/'
       haml :home
     end

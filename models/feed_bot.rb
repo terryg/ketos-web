@@ -13,6 +13,10 @@ class FeedBot
     raise NotImplementedError, "Implement this method in a child class"
 	end
 
+	def post_file(tempfile)
+    raise NotImplementedError, "Implement this method in a child class"
+	end
+
 	def load_items(last_id, auth_token)
     raise NotImplementedError, "Implement this method in a child class"
 	end

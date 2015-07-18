@@ -26,7 +26,9 @@ class FeedBotFactory
 				feed_bot = InstagramBot.new(tokens[:token], tokens[:token_secret])
 			end
  			if @provider == "tumblr"
+				puts "**** Making TumblrBot for #{tokens[:uid]}"
 				feed_bot = TumblrBot.new(tokens[:token], tokens[:token_secret])
+				feed_bot.uid = tokens[:uid]
 			end
  			if @provider == "twitter"
 				feed_bot = TwitterBot.new(tokens[:token], tokens[:token_secret])

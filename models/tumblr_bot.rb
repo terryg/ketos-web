@@ -5,6 +5,7 @@ require './models/feed_bot'
 require './models/item'
 
 class TumblrBot < FeedBot
+	attr_accessor :uid
 
   def initialize(token, secret)
     @token = token
@@ -15,7 +16,24 @@ class TumblrBot < FeedBot
     return @items
   end
 
-	def post(blogname, body, tempfile)
+	def post(body)
+    Tumblr.configure do |config|
+      config.consumer_key = ENV['TUMBLR_CONSUMER_KEY']
+      config.consumer_secret = ENV['TUMBLR_CONSUMER_SECRET']
+      config.oauth_token = @token
+      config.oauth_token_secret = @secret
+    end
+  
+    begin
+      client = Tumblr::Client.new
+			client.text("#{@uid}.tumblr.com", {:body => body})
+    rescue => e
+      puts "**** There was an error with Tumblr -> #{e} ****"
+    end
+
+  end
+
+	def post_file(tempfile)
     Tumblr.configure do |config|
       config.consumer_key = ENV['TUMBLR_CONSUMER_KEY']
       config.consumer_secret = ENV['TUMBLR_CONSUMER_SECRET']
