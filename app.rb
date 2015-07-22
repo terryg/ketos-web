@@ -1,3 +1,4 @@
+
 require 'sinatra'
 require 'oauth'
 require 'haml'
@@ -192,6 +193,11 @@ class App < Sinatra::Base
     haml :login
   end
 
+  get '/logout' do
+    session.clear
+    redirect '/'
+  end
+
   get '/account' do
     haml :account
   end
@@ -205,11 +211,6 @@ class App < Sinatra::Base
       session[params[:provider].to_sym] = nil
     end
     redirect '/account'
-  end
-
-  get '/logout' do
-    session.clear
-    redirect '/'
   end
 
   get '/auth/:provider/callback' do
@@ -267,14 +268,14 @@ class App < Sinatra::Base
     redirect(to("http://#{request.host}:#{request.port}"), 303)
   end
 
-  post "/feed/twitter/retweet/:id" do
-    if session[:twitter]
-      twit_bot = TwitterBot.new(session[:twitter][:token],
-                                session[:twitter][:token_secret])
-			twit_bot.retweet(params[:id])
-		end
-    redirect(to("http://#{request.host}:#{request.port}"), 303)
-	end  
+  get '/count' do
+    content_type :json
+		{:count => 42}.to_json
+  end
+
+  get '/fetch' do
+
+  end
 
   get "/feed/:provider" do
     items = []
@@ -298,6 +299,15 @@ class App < Sinatra::Base
     content_type :json
     items.map{ |o| o.to_json }.to_json
   end
+
+  post "/feed/twitter/retweet/:id" do
+    if session[:twitter]
+      twit_bot = TwitterBot.new(session[:twitter][:token],
+                                session[:twitter][:token_secret])
+			twit_bot.retweet(params[:id])
+		end
+    redirect(to("http://#{request.host}:#{request.port}"), 303)
+	end  
 
   protected
   
