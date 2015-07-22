@@ -328,3 +328,14 @@ $(document).ready(function () {
 	}
 
 });
+
+
+setInterval(function () {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET","count",false);
+  xmlhttp.send();
+  var resp = JSON.parse(xmlhttp.responseText);
+  document.getElementById("new-items-count").innerHTML = '<div>You have '+resp.count+' new items.</div';
+  document.getElementById("new-items-count").style.display = "block";
+},
+												15000);
