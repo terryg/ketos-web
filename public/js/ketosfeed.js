@@ -10,6 +10,7 @@ $(document).ready(function () {
 	var showtweetactions = true;
 	var showretweetindicator = true;
 	
+	
 	$.getJSON('/feed/tumblr', function(feeds) {
 		fetchFeed('tumblr', feeds);
 	}).error(function(jqXHR, textStatus, errorThrown) {
@@ -102,6 +103,21 @@ $(document).ready(function () {
   if (t == "") {
 	//  $('#feed').html('Have you configured your <a href="/account">account</a>?');
 	}
+
+
+
+});
+
+
+setInterval(function () {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET","count",false);
+  xmlhttp.send();
+  var resp = JSON.parse(xmlhttp.responseText);
+  document.getElementById("new-items-count").innerHTML = '<div onClick="closeNewItemsCount(this);">You have '+resp.count+' new items.</div';
+  document.getElementById("new-items-count").style.display = "block";
+},
+						15000);
 
   function KetosItem(provider, f) {
 		this.source = provider;
@@ -327,15 +343,6 @@ $(document).ready(function () {
 		}
 	}
 
-});
-
-
-setInterval(function () {
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET","count",false);
-  xmlhttp.send();
-  var resp = JSON.parse(xmlhttp.responseText);
-  document.getElementById("new-items-count").innerHTML = '<div>You have '+resp.count+' new items.</div';
-  document.getElementById("new-items-count").style.display = "block";
-},
-												15000);
+  function closeNewItemsCount(obj) {
+	  obj.style.display = 'none';
+  }
